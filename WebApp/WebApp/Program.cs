@@ -1,4 +1,7 @@
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -10,19 +13,11 @@ using WebApp.Data.Entities;
 
 internal class Program
 {
+    [Obsolete]
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Services
-            .Configure<JwtTokenSettings>(builder.Configuration.GetSection(nameof(JwtTokenSettings)));
-
-        builder.Services
-            .AddRazorComponents()
-            .AddInteractiveWebAssemblyComponents();
-
-        ApplicationContextConfiguration(builder.Services, builder.Configuration);
-        JwtTokenConfiguration(builder.Services, builder.Configuration);
+        ConfigureServices(builder.Services, builder.Configuration);
 
         var app = builder.Build();
         AddConfigurations(app);
@@ -30,11 +25,41 @@ internal class Program
         app.Run();
     }
 
+    [Obsolete]
+    private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
+    {
+        services
+            .Configure<JwtTokenSettings>(configuration.GetSection(nameof(JwtTokenSettings)));
+
+        services
+            .AddRazorComponents()
+            .AddInteractiveWebAssemblyComponents();
+
+        services.AddControllers(options =>
+         {
+             //options.Filters.Add<ExceptionFilter>();
+             //options.Filters.Add<ModelStateFilter>();
+
+         }).AddFluentValidation(options =>
+         {
+             //options.RegisterValidatorsFromAssemblyContaining<RegistrationRequestValidator>();
+             options.DisableDataAnnotationsValidation = true;
+             options.LocalizationEnabled = true;
+         });
+
+        SwaggerConfiguration(services);
+
+        ApplicationContextConfiguration(services, configuration);
+        JwtTokenConfiguration(services, configuration);
+    }
+
     private static void AddConfigurations(WebApplication app)
     {
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            app.UseSwagger();
+            app.UseSwaggerUI();
             app.UseWebAssemblyDebugging();
         }
         else
@@ -46,6 +71,12 @@ internal class Program
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
+        //app.UseMiddleware<TokenValidatorMiddleware>();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
+
+        app.MapControllers();
         app.UseAntiforgery();
 
         app.MapRazorComponents<App>()
@@ -86,5 +117,14 @@ internal class Program
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtTokenSettings.Key))
             };
         });
+    }
+
+    private static void SwaggerConfiguration(IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
+
+        services.Configure<ApiBehaviorOptions>(options
+            => options.SuppressModelStateInvalidFilter = true);
     }
 }
