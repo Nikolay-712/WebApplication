@@ -6,4 +6,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WebApp.Common\WebApp.Common.csproj" />
+    <ProjectReference Include="..\WebApp.Data\WebApp.Data.csproj" />
+    <ProjectReference Include="..\WebApp.Models\WebApp.Models.csproj" />
+  </ItemGroup>
+
 </Project>

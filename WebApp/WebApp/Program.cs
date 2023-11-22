@@ -10,6 +10,10 @@ using WebApp.Common.Configurations;
 using WebApp.Components;
 using WebApp.Data;
 using WebApp.Data.Entities;
+using WebApp.Filters;
+using WebApp.Middleware;
+using WebApp.Services.Implementations;
+using WebApp.Services.Interfaces;
 
 internal class Program
 {
@@ -37,8 +41,7 @@ internal class Program
 
         services.AddControllers(options =>
          {
-             //options.Filters.Add<ExceptionFilter>();
-             //options.Filters.Add<ModelStateFilter>();
+             options.Filters.Add<ExceptionFilter>();
 
          }).AddFluentValidation(options =>
          {
@@ -51,6 +54,8 @@ internal class Program
 
         ApplicationContextConfiguration(services, configuration);
         JwtTokenConfiguration(services, configuration);
+
+        AddApplicationServices(services);
     }
 
     private static void AddConfigurations(WebApplication app)
@@ -71,7 +76,7 @@ internal class Program
         app.UseHttpsRedirection();
 
         app.UseStaticFiles();
-        //app.UseMiddleware<TokenValidatorMiddleware>();
+        app.UseMiddleware<TokenValidatorMiddleware>();
 
         app.UseAuthentication();
         app.UseAuthorization();
@@ -126,5 +131,10 @@ internal class Program
 
         services.Configure<ApiBehaviorOptions>(options
             => options.SuppressModelStateInvalidFilter = true);
+    }
+
+    private static void AddApplicationServices(IServiceCollection services)
+    {
+        services.AddScoped<IAccountService, AccountService>();
     }
 }

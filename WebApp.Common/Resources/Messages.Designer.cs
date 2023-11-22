@@ -59,5 +59,32 @@ namespace WebApp.Common.Resources {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Email address already exists.
+        /// </summary>
+        public static string EmailAlreadyExists {
+            get {
+                return ResourceManager.GetString("EmailAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Something wrong try later.
+        /// </summary>
+        public static string GeneralErrorMessage {
+            get {
+                return ResourceManager.GetString("GeneralErrorMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User name already exists.
+        /// </summary>
+        public static string UserNameAlreadyExists {
+            get {
+                return ResourceManager.GetString("UserNameAlreadyExists", resourceCulture);
+            }
+        }
     }
 }

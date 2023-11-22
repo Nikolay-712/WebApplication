@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Exceptions\ClientSide\" />
-    <Folder Include="Exceptions\ServerSide\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Update="Resources\Messages.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
