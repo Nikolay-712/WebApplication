@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 using WebApp.Models.Request;
+using WebApp.Models.Response;
 using WebApp.Services.Interfaces;
 
 namespace WebApp.Controllers;
@@ -21,5 +22,15 @@ public class AccountsController : ControllerBase
     {
         await _accountService.RegistrationAsync(requestModel);
         return new ResponseContent();
+    }
+
+    [HttpPost("login")]
+    public async Task<ResponseContent<LoginResponseModel>> LoginAsync([FromBody] LoginRequestModel requestModel)
+    {
+        LoginResponseModel loginResponse = await _accountService.LoginAsync(requestModel);
+        return new ResponseContent<LoginResponseModel>()
+        {
+            Result = loginResponse
+        };
     }
 }

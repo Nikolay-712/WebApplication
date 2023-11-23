@@ -126,6 +126,9 @@
   <data name="GeneralErrorMessage" xml:space="preserve">
     <value>Нещо се обърка, моля опитаите по късно</value>
   </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Не валиден е-майл адрес или парола</value>
+  </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>Невалиден имейл формат</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>Има потребител с тoва име</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>Потребителят не е намерен</value>
   </data>
 </root>

@@ -126,6 +126,9 @@
   <data name="GeneralErrorMessage" xml:space="preserve">
     <value>Something wrong try later</value>
   </data>
+  <data name="InvalidCredentials" xml:space="preserve">
+    <value>Invalid email or password</value>
+  </data>
   <data name="InvalidEmail" xml:space="preserve">
     <value>Invalid email format</value>
   </data>
@@ -140,5 +143,8 @@
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>User name already exists</value>
+  </data>
+  <data name="UserNotFound" xml:space="preserve">
+    <value>User not found</value>
   </data>
 </root>

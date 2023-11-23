@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WebApp.Common\WebApp.Common.csproj" />
     <ProjectReference Include="..\WebApp.Data\WebApp.Data.csproj" />
     <ProjectReference Include="..\WebApp.Models\WebApp.Models.csproj" />

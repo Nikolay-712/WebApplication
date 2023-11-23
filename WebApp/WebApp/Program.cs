@@ -136,5 +136,6 @@ internal class Program
     private static void AddApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IJwtTokenManager, JwtTokenManager>();
     }
 }

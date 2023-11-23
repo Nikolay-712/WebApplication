@@ -88,6 +88,15 @@ namespace WebApp.Common.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid email or password.
+        /// </summary>
+        public static string InvalidCredentials {
+            get {
+                return ResourceManager.GetString("InvalidCredentials", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid email format.
         /// </summary>
         public static string InvalidEmail {
@@ -129,6 +138,15 @@ namespace WebApp.Common.Resources {
         public static string UserNameAlreadyExists {
             get {
                 return ResourceManager.GetString("UserNameAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User not found.
+        /// </summary>
+        public static string UserNotFound {
+            get {
+                return ResourceManager.GetString("UserNotFound", resourceCulture);
             }
         }
     }

@@ -7,6 +7,7 @@ using WebApp.Common.Resources;
 using WebApp.Data;
 using WebApp.Data.Entities;
 using WebApp.Models.Request;
+using WebApp.Models.Response;
 using WebApp.Services.Interfaces;
 
 namespace WebApp.Services.Implementations;
@@ -15,21 +16,39 @@ public class AccountService : IAccountService
 {
     private readonly ApplicationContext _applicationContext;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IJwtTokenManager _jwtTokenManager;
     private readonly ILogger<AccountService> _logger;
 
     public AccountService(
         ApplicationContext applicationContext,
         UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IJwtTokenManager jwtTokenManager,
         ILogger<AccountService> logger)
     {
         _applicationContext = applicationContext;
         _userManager = userManager;
+        _signInManager = signInManager;
+        _jwtTokenManager = jwtTokenManager;
         _logger = logger;
     }
 
     public async Task RegistrationAsync(RegistrationRequestModel requestModel)
     {
-        await RegistrationRequestValidation(requestModel);
+        bool existsEmail = await _applicationContext.Users.AnyAsync(x => x.Email! == requestModel.Email);
+        if (existsEmail)
+        {
+            _logger.LogError("Email already exists");
+            throw new EmailAlreadyExistsException(Messages.EmailAlreadyExists);
+        }
+
+        bool existsUsername = await _applicationContext.Users.AnyAsync(x => x.NormalizedEmail == requestModel.Email.ToUpper());
+        if (existsUsername)
+        {
+            _logger.LogError("Username already exists");
+            throw new EmailAlreadyExistsException(Messages.UserNameAlreadyExists);
+        }
 
         ApplicationUser user = new()
         {
@@ -52,20 +71,36 @@ public class AccountService : IAccountService
         _logger.LogInformation("Succeeded registration with email address: {email}", requestModel.Email);
     }
 
-    private async Task RegistrationRequestValidation(RegistrationRequestModel requestModel)
+    public async Task<LoginResponseModel> LoginAsync(LoginRequestModel requestModel)
     {
-        bool existsEmail = await _applicationContext.Users.AnyAsync(x => x.Email! == requestModel.Email);
-        if (existsEmail)
+        ApplicationUser? user = await _userManager.FindByEmailAsync(requestModel.Email);
+        if (user is null)
         {
-            _logger.LogError("Email already exists");
-            throw new EmailAlreadyExistsException(Messages.EmailAlreadyExists);
+            _logger.LogError("Not found user with {email}", requestModel.Email);
+            throw new InvalidCredentialsException(Messages.InvalidCredentials);
         }
 
-        bool existsUsername = await _applicationContext.Users.AnyAsync(x => x.NormalizedEmail == requestModel.Email.ToUpper());
-        if (existsUsername)
+        LoginResponseModel loginResponse = new();
+        if (!user.EmailConfirmed)
         {
-            _logger.LogError("Username already exists");
-            throw new EmailAlreadyExistsException(Messages.UserNameAlreadyExists);
+            loginResponse.IsConfirmedEmail = false;
+            return loginResponse;
         }
+
+        SignInResult signInResult = await _signInManager.CheckPasswordSignInAsync(user, requestModel.Password, lockoutOnFailure: false);
+        if (!signInResult.Succeeded)
+        {
+            _logger.LogError("Invalid authentication attempt: Email {email}", requestModel.Email);
+            throw new InvalidCredentialsException(Messages.InvalidCredentials);
+        }
+
+        string token = await _jwtTokenManager.GenerateJwtTokenAsync(user);
+
+        loginResponse.AccsesToken = token;
+        loginResponse.IsConfirmedEmail = true;
+        loginResponse.RememberMe = requestModel.RememberMe;
+
+        return loginResponse;
     }
+   
 }
