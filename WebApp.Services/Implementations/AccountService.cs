@@ -58,14 +58,14 @@ public class AccountService : IAccountService
         if (existsEmail)
         {
             _logger.LogError("Email already exists");
-            throw new EmailAlreadyExistsException("Email already exists");
+            throw new EmailAlreadyExistsException(Messages.EmailAlreadyExists);
         }
 
         bool existsUsername = await _applicationContext.Users.AnyAsync(x => x.NormalizedEmail == requestModel.Email.ToUpper());
         if (existsUsername)
         {
             _logger.LogError("Username already exists");
-            throw new EmailAlreadyExistsException("Username already exists");
+            throw new EmailAlreadyExistsException(Messages.UserNameAlreadyExists);
         }
     }
 }

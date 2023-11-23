@@ -120,8 +120,23 @@
   <data name="EmailAlreadyExists" xml:space="preserve">
     <value>Email address already exists</value>
   </data>
+  <data name="EmptyRequiredField" xml:space="preserve">
+    <value>This field is required</value>
+  </data>
   <data name="GeneralErrorMessage" xml:space="preserve">
     <value>Something wrong try later</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Invalid email format</value>
+  </data>
+  <data name="InvalidLengthRange" xml:space="preserve">
+    <value>The length of this field should be between {MinLength} and {MaxLength} characters</value>
+  </data>
+  <data name="InvalidUserName" xml:space="preserve">
+    <value>Username can only contain letters and digits</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Passwords do not match</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>User name already exists</value>

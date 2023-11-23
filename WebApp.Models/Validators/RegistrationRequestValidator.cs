@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using WebApp.Common.Resources;
 using WebApp.Models.Request;
 
 namespace WebApp.Models.Validators;

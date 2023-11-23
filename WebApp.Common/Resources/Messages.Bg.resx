@@ -120,8 +120,23 @@
   <data name="EmailAlreadyExists" xml:space="preserve">
     <value>Има потребител с този е-маил адрес</value>
   </data>
+  <data name="EmptyRequiredField" xml:space="preserve">
+    <value>Това поле е задължително</value>
+  </data>
   <data name="GeneralErrorMessage" xml:space="preserve">
     <value>Нещо се обърка, моля опитаите по късно</value>
+  </data>
+  <data name="InvalidEmail" xml:space="preserve">
+    <value>Невалиден имейл формат</value>
+  </data>
+  <data name="InvalidLengthRange" xml:space="preserve">
+    <value>Дължината на това поле трябва да бъде между {MinLength} и {MaxLength} символа</value>
+  </data>
+  <data name="InvalidUserName" xml:space="preserve">
+    <value>Потребителското име може да съдържа само букви и цифри</value>
+  </data>
+  <data name="PasswordMismatch" xml:space="preserve">
+    <value>Паролите не съвпадат</value>
   </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>Има потребител с тoва име</value>
