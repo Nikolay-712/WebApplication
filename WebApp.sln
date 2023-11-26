@@ -7,13 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "WebApp\WebApp\Web
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Client", "WebApp\WebApp.Client\WebApp.Client.csproj", "{2DD40FF5-F3B2-4929-83C4-DA1A7D2E6EFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Data", "WebApp.Data\WebApp.Data.csproj", "{DBFCF9D1-7EC7-492A-AA60-7FD14F5710BC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Data", "WebApp.Data\WebApp.Data.csproj", "{DBFCF9D1-7EC7-492A-AA60-7FD14F5710BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Services", "WebApp.Services\WebApp.Services.csproj", "{29F29749-9481-43E9-A020-E82C7A036C8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Services", "WebApp.Services\WebApp.Services.csproj", "{29F29749-9481-43E9-A020-E82C7A036C8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Common", "WebApp.Common\WebApp.Common.csproj", "{D0F9E1A5-F9B7-48B5-8160-6F20079BE05B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Common", "WebApp.Common\WebApp.Common.csproj", "{D0F9E1A5-F9B7-48B5-8160-6F20079BE05B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Models", "WebApp.Models\WebApp.Models.csproj", "{86D59033-8F5A-4472-B928-1FE1F6487F94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Models", "WebApp.Models\WebApp.Models.csproj", "{86D59033-8F5A-4472-B928-1FE1F6487F94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

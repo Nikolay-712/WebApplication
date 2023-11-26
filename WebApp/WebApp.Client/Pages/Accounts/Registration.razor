@@ -1,0 +1,69 @@
+﻿@page "/registration"
+@inject IAccountClientService _accountClient
+@inject NavigationManager _navigationManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="RequestModel" OnValidSubmit="RegistrationAsync">
+                <FluentValidationValidator />
+                @if (ErrorMessage != string.Empty)
+                {
+                    <h3>@ErrorMessage</h3>
+                }
+                <div class="card">
+                    <div class="card-header">Please Register</div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <label class="form-label">User name</label>
+                            <InputText @bind-Value="RequestModel.UserName" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.UserName)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <InputText @bind-Value="RequestModel.Email" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.Email)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" @bind-Value="RequestModel.Password" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.Password)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm password</label>
+                            <InputText type="password" @bind-Value="RequestModel.ConfirmPassword" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.Password)" />
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private RegistrationRequestModel RequestModel = new();
+    private ResponseContent RegistrationResponse = new();
+    private string ErrorMessage = string.Empty;
+
+    private async Task RegistrationAsync()
+    {
+        RegistrationResponse = await _accountClient.RegistrationAsync(RequestModel);
+        if (RegistrationResponse.ErrorResponse is null)
+        {
+            _navigationManager.NavigateTo("login");
+            return;
+        }
+
+        ErrorMessage = RegistrationResponse.ErrorResponse.Message;
+    }
+}

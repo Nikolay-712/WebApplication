@@ -1,0 +1,88 @@
+﻿@page "/login"
+@inject IAccountClientService _accountClient
+@inject NavigationManager _navigationManager
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="RequestModel" OnValidSubmit="LoginAsync">
+                <FluentValidationValidator />
+                @if (ErrorMessage != string.Empty)
+                {
+                    <h3>@ErrorMessage</h3>
+                }
+                <div class="card">
+                    <div class="card-header">Please Login</div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <label class="form-label">Email Address</label>
+                            <InputText @bind-Value="RequestModel.Email" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.Email)" />
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label class="form-label">Password</label>
+                            <InputText type="password" @bind-Value="RequestModel.Password" class="form-control"></InputText>
+                            <ValidationMessage For="@(() => RequestModel.Password)" />
+                        </div>
+
+                    </div>
+                    @if (IsConfirmedEmail)
+                    {
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <h3>@NotConfirmedEmailMessage</h3>
+                        <button @onclick="ResendEmailAsync">
+                            Resend email
+                        </button>
+                    }
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    private LoginRequestModel RequestModel = new();
+    private ResponseContent<LoginResponseModel> LoginResponse = new();
+    private string ErrorMessage = string.Empty;
+
+    private bool IsConfirmedEmail = true;
+    private string NotConfirmedEmailMessage = string.Empty;
+
+    private async Task LoginAsync()
+    {
+        LoginResponse = await _accountClient.LoginAsync(RequestModel);
+        if (LoginResponse.ErrorResponse is null)
+        {
+            IsConfirmedEmail = LoginResponse.Result.IsConfirmedEmail;
+            if (IsConfirmedEmail)
+            {
+                //Add Jwt token to local storage and change authentication state
+                _navigationManager.NavigateTo("/");
+                return;
+            }
+
+            //Show the message if is not confirmed and create functionality to resend confirmation email linc;
+            NotConfirmedEmailMessage = "Pleas confirm ours email address";
+
+            return;
+
+
+        }
+
+        ErrorMessage = LoginResponse.ErrorResponse.Message;
+    }
+
+    private async Task ResendEmailAsync()
+    {
+
+    }
+}

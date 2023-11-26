@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApp.Client.Pages;
+using WebApp.Client.Services.Implementations;
+using WebApp.Client.Services.Interfaces;
 using WebApp.Common.Configurations;
 using WebApp.Components;
 using WebApp.Data;
@@ -38,6 +40,9 @@ internal class Program
         services
             .AddRazorComponents()
             .AddInteractiveWebAssemblyComponents();
+
+        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7061/") });
+
 
         services.AddControllers(options =>
          {
@@ -136,6 +141,7 @@ internal class Program
     private static void AddApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IAccountClientService, AccountClientService>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
     }
 }
