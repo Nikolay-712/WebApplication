@@ -9,4 +9,6 @@ public interface IAccountClientService
     Task<ResponseContent> RegistrationAsync(RegistrationRequestModel requestModel);
 
     Task<ResponseContent<LoginResponseModel>> LoginAsync(LoginRequestModel requestModel);
+
+    Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel);
 }

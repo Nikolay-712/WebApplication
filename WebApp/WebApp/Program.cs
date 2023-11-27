@@ -38,6 +38,9 @@ internal class Program
             .Configure<JwtTokenSettings>(configuration.GetSection(nameof(JwtTokenSettings)));
 
         services
+            .Configure<EmailSenderSettings>(configuration.GetSection(nameof(EmailSenderSettings)));
+
+        services
             .AddRazorComponents()
             .AddInteractiveWebAssemblyComponents();
 
@@ -143,5 +146,6 @@ internal class Program
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAccountClientService, AccountClientService>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
+        services.AddScoped<IEmailSenderService, EmailSenderService>();
     }
 }

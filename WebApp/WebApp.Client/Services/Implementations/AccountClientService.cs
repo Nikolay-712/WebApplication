@@ -1,4 +1,6 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http;
+using System;
+using System.Net.Http.Json;
 using WebApp.Client.Services.Interfaces;
 using WebApp.Models;
 using WebApp.Models.Request;
@@ -10,13 +12,11 @@ public class AccountClientService : IAccountClientService
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
-    private readonly string _endpointAddress;
 
     public AccountClientService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _baseUrl = httpClient.BaseAddress!.AbsoluteUri;
-        _endpointAddress = "api/accounts/";
+        _baseUrl = $"{httpClient.BaseAddress!.AbsoluteUri}api/accounts/";
     }
 
     public async Task<ResponseContent> RegistrationAsync(RegistrationRequestModel requestModel)
@@ -24,7 +24,7 @@ public class AccountClientService : IAccountClientService
         using HttpRequestMessage requestMessage = new();
 
         requestMessage.Method = HttpMethod.Post;
-        requestMessage.RequestUri = new Uri($"{_baseUrl}{_endpointAddress}registration");
+        requestMessage.RequestUri = new Uri($"{_baseUrl}registration");
         requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
 
         using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
@@ -38,12 +38,26 @@ public class AccountClientService : IAccountClientService
         using HttpRequestMessage requestMessage = new();
 
         requestMessage.Method = HttpMethod.Post;
-        requestMessage.RequestUri = new Uri($"{_baseUrl}{_endpointAddress}login");
+        requestMessage.RequestUri = new Uri($"{_baseUrl}login");
         requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
 
         using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
 
         ResponseContent<LoginResponseModel> responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent<LoginResponseModel>>();
+        return responseContent;
+    }
+
+    public async Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}confirm-email");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent>();
         return responseContent;
     }
 

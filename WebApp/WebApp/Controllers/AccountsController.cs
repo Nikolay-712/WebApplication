@@ -12,7 +12,7 @@ public class AccountsController : ControllerBase
 {
     private readonly IAccountService _accountService;
 
-    public AccountsController(IAccountService accountService)
+    public AccountsController(IAccountService accountService, IEmailSenderService emailSenderService)
     {
         _accountService = accountService;
     }
@@ -32,5 +32,12 @@ public class AccountsController : ControllerBase
         {
             Result = loginResponse
         };
+    }
+
+    [HttpPost("confirm-email")]
+    public async Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel)
+    {
+        await _accountService.ConfirmEmailAsync(requestModel);
+        return new ResponseContent();
     }
 }

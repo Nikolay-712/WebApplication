@@ -8,4 +8,6 @@ public interface IAccountService
     Task RegistrationAsync(RegistrationRequestModel requestModel);
 
     Task<LoginResponseModel> LoginAsync(LoginRequestModel requestModel);
+
+    Task ConfirmEmailAsync(ConfirmEmailRequestModel requestModel);
 }

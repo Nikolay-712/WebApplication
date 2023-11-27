@@ -1,0 +1,38 @@
+﻿@page "/confirm-email"
+@inject IAccountClientService _accountClient
+@inject NavigationManager _navigationManager
+
+<h3>EmailConfirmation</h3>
+
+@if (ErrorMessage != string.Empty)
+{
+    <h3>@ErrorMessage</h3>
+}
+
+@code {
+    private ResponseContent ResponseContent = new();
+    private string ErrorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Uri uri = new Uri(_navigationManager.Uri);
+        var queryParameters = QueryHelpers.ParseQuery(uri.Query);
+
+        //Fix if the confirmation url is not valid not contains correct parameters
+
+        ConfirmEmailRequestModel requestModel = new()
+            {
+                Identifire = queryParameters["identifier"]!,
+                Token = queryParameters["token"]!
+            };
+
+        ResponseContent = await _accountClient.ConfirmEmailAsync(requestModel);
+        if (ResponseContent.ErrorResponse is null)
+        {
+            _navigationManager.NavigateTo("login");
+            return;
+        }
+
+        ErrorMessage = ResponseContent.ErrorResponse.Message;
+    }
+}
