@@ -2,28 +2,32 @@
 @inject IAccountClientService _accountClient
 @inject NavigationManager _navigationManager
 
-<h3>EmailConfirmation</h3>
-
-@if (ErrorMessage != string.Empty)
-{
-    <h3>@ErrorMessage</h3>
-}
+<DisplayErrorMessage Message="@ErrorMessage" />
 
 @code {
     private ResponseContent ResponseContent = new();
     private string ErrorMessage = string.Empty;
 
+    [SupplyParameterFromQuery]
+    private string? identifier { get; set; }
+
+    [SupplyParameterFromQuery]
+    private string? token { get; set; }
+
+
     protected override async Task OnInitializedAsync()
     {
-        Uri uri = new Uri(_navigationManager.Uri);
-        var queryParameters = QueryHelpers.ParseQuery(uri.Query);
 
-        //Fix if the confirmation url is not valid not contains correct parameters
+        if (string.IsNullOrEmpty(identifier) || string.IsNullOrEmpty(token))
+        {
+            _navigationManager.NavigateTo("/");
+            return;
+        }
 
         ConfirmEmailRequestModel requestModel = new()
             {
-                Identifire = queryParameters["identifier"]!,
-                Token = queryParameters["token"]!
+                Identifire = identifier,
+                Token = token
             };
 
         ResponseContent = await _accountClient.ConfirmEmailAsync(requestModel);

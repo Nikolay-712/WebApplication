@@ -2,48 +2,52 @@
 @inject IAccountClientService _accountClient
 @inject NavigationManager _navigationManager
 
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <EditForm Model="RequestModel" OnValidSubmit="LoginAsync">
+<PageTitle>Log in</PageTitle>
+
+<div class="row">
+    <div class="col-md-6">
+        <section>
+            <EditForm Model="RequestModel" method="post" OnValidSubmit="LoginAsync">
                 <FluentValidationValidator />
-                @if (ErrorMessage != string.Empty)
-                {
-                    <h3>@ErrorMessage</h3>
-                }
-                <div class="card">
-                    <div class="card-header">Please Login</div>
-                    <div class="card-body">
+                <h2>Use a local account to log in.</h2>
+                <hr />
 
-                        <div class="form-group">
-                            <label class="form-label">Email Address</label>
-                            <InputText @bind-Value="RequestModel.Email" class="form-control"></InputText>
-                            <ValidationMessage For="@(() => RequestModel.Email)" />
-                        </div>
+                <DisplayErrorMessage Message="@ErrorMessage" />
 
-                        <div class="form-group mt-3">
-                            <label class="form-label">Password</label>
-                            <InputText type="password" @bind-Value="RequestModel.Password" class="form-control"></InputText>
-                            <ValidationMessage For="@(() => RequestModel.Password)" />
-                        </div>
-
-                    </div>
-                    @if (IsConfirmedEmail)
-                    {
-                        <div class="card-footer">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    }
-                    else
-                    {
-                        <h3>@NotConfirmedEmailMessage</h3>
-                        <button @onclick="ResendEmailAsync">
-                            Resend email
-                        </button>
-                    }
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="RequestModel.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label for="email" class="form-label">Email</label>
+                    <ValidationMessage For="() => RequestModel.Email" class="text-danger" />
                 </div>
+                <div class="form-floating mb-3">
+                    <InputText type="password" @bind-Value="RequestModel.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label for="password" class="form-label">Password</label>
+                    <ValidationMessage For="() => RequestModel.Password" class="text-danger" />
+                </div>
+                <div class="checkbox mb-3">
+                    <label class="form-label">
+                        <InputCheckbox @bind-Value="RequestModel.RememberMe" class="darker-border-checkbox form-check-input" />
+                        Remember me
+                    </label>
+                </div>
+                @if (IsConfirmedEmail)
+                {
+                    <div>
+                        <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+                    </div>
+                }
             </EditForm>
-        </div>
+
+            @if (!IsConfirmedEmail)
+            {
+                <div class="alert alert-primary" role="alert">
+                    <p> Your email address is not verified. Please check your email to confirm your email address</p>
+                    <hr>
+                    <p>If you have not received a confirmation email, click the button to receive a new one</p>
+                    <button @onclick="ResendEmailAsync" class="w-100 btn btn-lg btn-primary">Resend email</button>
+                </div>
+            }
+        </section>
     </div>
 </div>
 
@@ -51,17 +55,26 @@
 
 @code {
     private LoginRequestModel RequestModel = new();
-    private ResponseContent<LoginResponseModel> LoginResponse = new();
-    private string ErrorMessage = string.Empty;
 
+    private ResponseContent<LoginResponseModel> LoginResponse = new();
+    private ResponseContent EmailSenderResponse = new();
+
+    private string ErrorMessage = string.Empty;
     private bool IsConfirmedEmail = true;
-    private string NotConfirmedEmailMessage = string.Empty;
 
     private async Task LoginAsync()
     {
         LoginResponse = await _accountClient.LoginAsync(RequestModel);
-        if (LoginResponse.ErrorResponse is null)
+
+        if (LoginResponse.ErrorResponse is not null)
         {
+            ErrorMessage = LoginResponse.ErrorResponse.Message;
+            return;
+        }
+
+        if (LoginResponse.Result is not null)
+        {
+            ErrorMessage = string.Empty;
             IsConfirmedEmail = LoginResponse.Result.IsConfirmedEmail;
             if (IsConfirmedEmail)
             {
@@ -69,20 +82,24 @@
                 _navigationManager.NavigateTo("/");
                 return;
             }
-
-            //Show the message if is not confirmed and create functionality to resend confirmation email linc;
-            NotConfirmedEmailMessage = "Pleas confirm ours email address";
-
-            return;
-
-
         }
-
-        ErrorMessage = LoginResponse.ErrorResponse.Message;
     }
 
     private async Task ResendEmailAsync()
     {
+        if (string.IsNullOrEmpty(RequestModel.Email))
+        {
+            ErrorMessage = "Provide valid email address";
+            return;
+        }
 
+        EmailSenderResponse = await _accountClient.ResendEmailConfirmationAsync(RequestModel.Email);
+        if (EmailSenderResponse.ErrorResponse is not null)
+        {
+            ErrorMessage = EmailSenderResponse.ErrorResponse.Message;
+            return;
+        }
+
+        _navigationManager.NavigateTo("login");
     }
 }

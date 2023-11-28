@@ -5,9 +5,11 @@ namespace WebApp.Services.Interfaces;
 
 public interface IAccountService
 {
-    Task RegistrationAsync(RegistrationRequestModel requestModel);
+    Task<bool> RegistrationAsync(RegistrationRequestModel requestModel);
 
     Task<LoginResponseModel> LoginAsync(LoginRequestModel requestModel);
 
     Task ConfirmEmailAsync(ConfirmEmailRequestModel requestModel);
+
+    Task ResendEmailConfirmationAsync(string email);
 }

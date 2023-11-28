@@ -39,7 +39,7 @@ public class AccountService : IAccountService
         _logger = logger;
     }
 
-    public async Task RegistrationAsync(RegistrationRequestModel requestModel)
+    public async Task<bool> RegistrationAsync(RegistrationRequestModel requestModel)
     {
         bool existsEmail = await _applicationContext.Users.AnyAsync(x => x.Email! == requestModel.Email);
         if (existsEmail)
@@ -77,6 +77,7 @@ public class AccountService : IAccountService
         await _emailSenderService.SendEmailConfirmationAsync(user.Email, confirmationUri.AbsoluteUri);
 
         _logger.LogInformation("Succeeded registration with email address: {email}", requestModel.Email);
+        return identityResult.Succeeded;
     }
 
     public async Task<LoginResponseModel> LoginAsync(LoginRequestModel requestModel)
@@ -146,7 +147,13 @@ public class AccountService : IAccountService
         }
     }
 
-    public async Task<Uri> GenerateEmailConfirmationUri(string email)
+    public async Task ResendEmailConfirmationAsync(string email)
+    {
+        Uri confirmationUri = await GenerateEmailConfirmationUri(email);
+        await _emailSenderService.SendEmailConfirmationAsync(email, confirmationUri.AbsoluteUri);
+    }
+
+    private async Task<Uri> GenerateEmailConfirmationUri(string email)
     {
         ApplicationUser? user = await _userManager.FindByEmailAsync(email);
         if (user is null)

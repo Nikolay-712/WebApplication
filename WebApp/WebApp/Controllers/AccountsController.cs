@@ -18,10 +18,13 @@ public class AccountsController : ControllerBase
     }
 
     [HttpPost("registration")]
-    public async Task<ResponseContent> RegistrationAsync([FromBody] RegistrationRequestModel requestModel)
+    public async Task<ResponseContent<bool>> RegistrationAsync([FromBody] RegistrationRequestModel requestModel)
     {
-        await _accountService.RegistrationAsync(requestModel);
-        return new ResponseContent();
+        bool isSucceeded = await _accountService.RegistrationAsync(requestModel);
+        return new ResponseContent<bool>()
+        {
+            Result = isSucceeded
+        };
     }
 
     [HttpPost("login")]
@@ -35,9 +38,16 @@ public class AccountsController : ControllerBase
     }
 
     [HttpPost("confirm-email")]
-    public async Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel)
+    public async Task<ResponseContent> ConfirmEmailAsync([FromBody] ConfirmEmailRequestModel requestModel)
     {
         await _accountService.ConfirmEmailAsync(requestModel);
+        return new ResponseContent();
+    }
+
+    [HttpGet("resend-email/{email}")]
+    public async Task<ResponseContent> ResendEmailConfirmationAsync([FromRoute] string email)
+    {
+        await _accountService.ResendEmailConfirmationAsync(email);
         return new ResponseContent();
     }
 }
