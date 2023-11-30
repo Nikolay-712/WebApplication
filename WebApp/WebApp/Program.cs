@@ -1,5 +1,7 @@
+using Blazored.LocalStorage;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +45,6 @@ internal class Program
         services
             .AddRazorComponents()
             .AddInteractiveWebAssemblyComponents();
-
-        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7061/") });
 
 
         services.AddControllers(options =>
@@ -97,7 +97,6 @@ internal class Program
             .AddAdditionalAssemblies(typeof(Counter).Assembly);
     }
 
-
     private static void ApplicationContextConfiguration(IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -144,8 +143,14 @@ internal class Program
     private static void AddApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IAccountService, AccountService>();
-        services.AddScoped<IAccountClientService, AccountClientService>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
+
+        //Client side
+        services.AddScoped<IAccountClientService, AccountClientService>();
+        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7061/") });
+        services.AddBlazoredLocalStorage();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<AuthenticationStateProvider, ClientAuthenticationStateProvider>();
     }
 }

@@ -5,17 +5,23 @@ using WebApp.Client.Services.Interfaces;
 using WebApp.Models;
 using WebApp.Models.Request;
 using WebApp.Models.Response;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http.Headers;
 
 namespace WebApp.Client.Services.Implementations;
 
 public class AccountClientService : IAccountClientService
 {
     private readonly HttpClient _httpClient;
+    private readonly ITokenService _tokenService;
+    private readonly AuthenticationStateProvider _authenticationStateProvider;
     private readonly string _baseUrl;
 
-    public AccountClientService(HttpClient httpClient)
+    public AccountClientService(HttpClient httpClient, ITokenService tokenService, AuthenticationStateProvider authenticationStateProvider)
     {
         _httpClient = httpClient;
+        _tokenService = tokenService;
+        _authenticationStateProvider = authenticationStateProvider;
         _baseUrl = $"{httpClient.BaseAddress!.AbsoluteUri}api/accounts/";
     }
 
@@ -43,7 +49,14 @@ public class AccountClientService : IAccountClientService
 
         using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
 
-        ResponseContent<LoginResponseModel>? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent<LoginResponseModel>>();
+        ResponseContent<LoginResponseModel>? responseContent = await responseMessage.Content
+            .ReadFromJsonAsync<ResponseContent<LoginResponseModel>>();
+
+        await _tokenService.SetAsync("jwt_token", responseContent!.Result.AccsesToken);
+        ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(requestModel.Email);
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", responseContent!.Result.AccsesToken);
+
+
         return responseContent!;
     }
 
