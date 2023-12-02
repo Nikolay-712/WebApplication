@@ -13,4 +13,8 @@ public interface IAccountClientService
     Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel);
 
     Task<ResponseContent> ResendEmailConfirmationAsync(string email);
+
+    Task<ResponseContent> ResetPasswordAsync(ResetPasswordRequestModel requestModel);
+
+    Task<ResponseContent> ChangePasswordAsync(ChangePasswordRequestModel requestModel);
 }

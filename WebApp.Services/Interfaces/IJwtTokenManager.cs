@@ -6,5 +6,7 @@ public interface IJwtTokenManager
 {
     Task<string> GenerateJwtTokenAsync(ApplicationUser user);
 
-    Task<string> GenerateConfirmEmailTokenAsync(string email);
+    Task<string> GenerateConfirmEmailTokenAsync(ApplicationUser user);
+
+    Task<string> GenerateForgetPasswordTokenAsync(ApplicationUser user);
 }

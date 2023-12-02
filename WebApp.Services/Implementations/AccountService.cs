@@ -73,7 +73,7 @@ public class AccountService : IAccountService
             throw new NotSuccessfulRegistrationException(Messages.GeneralErrorMessage);
         }
 
-        Uri confirmationUri = await GenerateEmailConfirmationUri(user.Email);
+        Uri confirmationUri = await GenerateEmailConfirmationUri(user);
         await _emailSenderService.SendEmailConfirmationAsync(user.Email, confirmationUri.AbsoluteUri);
 
         _logger.LogInformation("Succeeded registration with email address: {email}", requestModel.Email);
@@ -149,12 +149,6 @@ public class AccountService : IAccountService
 
     public async Task ResendEmailConfirmationAsync(string email)
     {
-        Uri confirmationUri = await GenerateEmailConfirmationUri(email);
-        await _emailSenderService.SendEmailConfirmationAsync(email, confirmationUri.AbsoluteUri);
-    }
-
-    private async Task<Uri> GenerateEmailConfirmationUri(string email)
-    {
         ApplicationUser? user = await _userManager.FindByEmailAsync(email);
         if (user is null)
         {
@@ -162,11 +156,70 @@ public class AccountService : IAccountService
             throw new NotFoundUserException(Messages.UserNotFound);
         }
 
-        string token = await _jwtTokenManager.GenerateConfirmEmailTokenAsync(email);
+        Uri confirmationUri = await GenerateEmailConfirmationUri(user);
+        await _emailSenderService.SendEmailConfirmationAsync(email, confirmationUri.AbsoluteUri);
+    }
+
+    public async Task ResetPasswordAsync(ResetPasswordRequestModel requestModel)
+    {
+        ApplicationUser? user = await _userManager.FindByEmailAsync(requestModel.Email);
+        if (user is null)
+        {
+            _logger.LogError("Not found user with {email}", requestModel.Email);
+            throw new NotFoundUserException(Messages.UserNotFound);
+        }
+
+        Uri changePasswordUri = await GenerateResetPasswordUri(user);
+        await _emailSenderService.SendChangePasswordAsync(user.Email!, changePasswordUri.AbsoluteUri);
+    }
+
+    public async Task ChangePasswordAsync(ChangePasswordRequestModel requestModel)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(requestModel.Identifire);
+        if (user is null)
+        {
+            _logger.LogError("Reset password request contains invalid user ID {userId}", requestModel.Identifire);
+            throw new InvalidConfirmationException("Request contains invalid user");
+        }
+
+        string resetPasswordToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(requestModel.Token));
+        bool isValidToken = await _userManager
+           .VerifyUserTokenAsync(user, _userManager.Options.Tokens.PasswordResetTokenProvider, "ResetPassword", resetPasswordToken);
+
+        if (!isValidToken)
+        {
+            _logger.LogError("Reset password request contains invalid token");
+            throw new InvalidConfirmationException("Request contains invalid token");
+        }
+
+        IdentityResult identityResult = await _userManager.ResetPasswordAsync(user, resetPasswordToken, requestModel.Password);
+        if (!identityResult.Succeeded)
+        {
+            IList<string> messages = identityResult.Errors.Select(x => x.Description).ToList();
+            foreach (var errorMessage in messages)
+            {
+                _logger.LogError(errorMessage);
+            }
+            throw new InvalidConfirmationException("Not succeeded reset password operation");
+        }
+    }
+
+    private async Task<Uri> GenerateEmailConfirmationUri(ApplicationUser user)
+    {
+        string token = await _jwtTokenManager.GenerateConfirmEmailTokenAsync(user);
         string baseUrl = "https://localhost:7061";
 
         Uri confirmationLink = new Uri($@"{baseUrl}/confirm-email?identifier={user.Id}&token={token}", new UriCreationOptions());
         return confirmationLink;
+    }
+
+    private async Task<Uri> GenerateResetPasswordUri(ApplicationUser user)
+    {
+        string resetPasswordToken = await _jwtTokenManager.GenerateForgetPasswordTokenAsync(user);
+        string baseUrl = "https://localhost:7061";
+
+        Uri changePasswordLink = new Uri($@"{baseUrl}account/change-password?identifier={user.Id}&token={resetPasswordToken}", new UriCreationOptions());
+        return changePasswordLink;
     }
 
 }

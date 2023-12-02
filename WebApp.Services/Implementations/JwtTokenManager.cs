@@ -48,14 +48,19 @@ public class JwtTokenManager : IJwtTokenManager
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<string> GenerateConfirmEmailTokenAsync(string email)
+    public async Task<string> GenerateConfirmEmailTokenAsync(ApplicationUser user)
     {
-        ApplicationUser user = await _userManager.FindByEmailAsync(email)
-           ?? throw new NotFoundUserException("Not found user");
-
         string confirmEmailToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         confirmEmailToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(confirmEmailToken));
 
         return confirmEmailToken;
+    }
+
+    public async Task<string> GenerateForgetPasswordTokenAsync(ApplicationUser user)
+    {
+        string resetPasswordToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+        resetPasswordToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetPasswordToken));
+
+        return resetPasswordToken;
     }
 }

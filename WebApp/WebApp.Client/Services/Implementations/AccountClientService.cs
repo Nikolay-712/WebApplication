@@ -52,9 +52,9 @@ public class AccountClientService : IAccountClientService
         ResponseContent<LoginResponseModel>? responseContent = await responseMessage.Content
             .ReadFromJsonAsync<ResponseContent<LoginResponseModel>>();
 
-        await _tokenService.SetAsync("jwt_token", responseContent!.Result.AccsesToken);
-        ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(requestModel.Email);
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", responseContent!.Result.AccsesToken);
+        //await _tokenService.SetAsync("jwt_token", responseContent!.Result.AccsesToken);
+        //((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(requestModel.Email);
+        //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", responseContent!.Result.AccsesToken);
 
 
         return responseContent!;
@@ -80,6 +80,34 @@ public class AccountClientService : IAccountClientService
 
         requestMessage.Method = HttpMethod.Get;
         requestMessage.RequestUri = new Uri($"{_baseUrl}resend-email/{email}");
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent>();
+        return responseContent!;
+    }
+
+    public async Task<ResponseContent> ResetPasswordAsync(ResetPasswordRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}reset-password");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent>();
+        return responseContent!;
+    }
+
+    public async Task<ResponseContent> ChangePasswordAsync(ChangePasswordRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}change-password");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
 
         using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
 

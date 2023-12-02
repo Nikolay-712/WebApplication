@@ -17,7 +17,8 @@ public class ClientAuthenticationStateProvider : AuthenticationStateProvider
 
     public async override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjYjhjOTE4Yi1lNGFhLTQzNzQtYWNjNC0wOGRiZWZmYzAyMWMiLCJlbWFpbCI6Im4uZ2VvcmdpZXZwZXJzb25hbEBnbWFpbC5jb20iLCJuYmYiOjE3MDEzNzAzMzIsImV4cCI6MTcwMTM3MzkzMiwiaWF0IjoxNzAxMzcwMzMyLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo3MDU2IiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzA1NiJ9.MJ5kqM52JVpW2ytRcfOajS8GYbEe3PLr5xi8UDB1EW0";
+        string token = null;
+        //var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiJjYjhjOTE4Yi1lNGFhLTQzNzQtYWNjNC0wOGRiZWZmYzAyMWMiLCJlbWFpbCI6Im4uZ2VvcmdpZXZwZXJzb25hbEBnbWFpbC5jb20iLCJuYmYiOjE3MDEzNzAzMzIsImV4cCI6MTcwMTM3MzkzMiwiaWF0IjoxNzAxMzcwMzMyLCJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo3MDU2IiwiYXVkIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzA1NiJ9.MJ5kqM52JVpW2ytRcfOajS8GYbEe3PLr5xi8UDB1EW0";
         //var token = await _tokenService.GetAsync(_tokenKey);
 
         if (string.IsNullOrEmpty(token))

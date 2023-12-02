@@ -50,4 +50,18 @@ public class AccountsController : ControllerBase
         await _accountService.ResendEmailConfirmationAsync(email);
         return new ResponseContent();
     }
+
+    [HttpPost("reset-password")]
+    public async Task<ResponseContent> ResetPasswordAsync(ResetPasswordRequestModel requestModel)
+    {
+        await _accountService.ResetPasswordAsync(requestModel);
+        return new ResponseContent();
+    }
+
+    [HttpPost("change-password")]
+    public async Task<ResponseContent> ChangePasswordAsync(ChangePasswordRequestModel requestModel)
+    {
+        await _accountService.ChangePasswordAsync(requestModel);
+        return new ResponseContent();
+    }
 }

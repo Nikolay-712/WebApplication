@@ -9,16 +9,16 @@
     private string ErrorMessage = string.Empty;
 
     [SupplyParameterFromQuery]
-    private string? identifier { get; set; }
+    private string? Identifier { get; set; }
 
     [SupplyParameterFromQuery]
-    private string? token { get; set; }
+    private string? Token { get; set; }
 
 
     protected override async Task OnInitializedAsync()
     {
 
-        if (string.IsNullOrEmpty(identifier) || string.IsNullOrEmpty(token))
+        if (string.IsNullOrEmpty(Identifier) || string.IsNullOrEmpty(Token))
         {
             _navigationManager.NavigateTo("/");
             return;
@@ -26,8 +26,8 @@
 
         ConfirmEmailRequestModel requestModel = new()
             {
-                Identifire = identifier,
-                Token = token
+                Identifire = Identifier,
+                Token = Token
             };
 
         ResponseContent = await _accountClient.ConfirmEmailAsync(requestModel);
