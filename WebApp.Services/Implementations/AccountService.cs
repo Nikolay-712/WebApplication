@@ -209,7 +209,7 @@ public class AccountService : IAccountService
         string token = await _jwtTokenManager.GenerateConfirmEmailTokenAsync(user);
         string baseUrl = "https://localhost:7061";
 
-        Uri confirmationLink = new Uri($@"{baseUrl}/confirm-email?identifier={user.Id}&token={token}", new UriCreationOptions());
+        Uri confirmationLink = new Uri($@"{baseUrl}account/confirm-email?identifier={user.Id}&token={token}", new UriCreationOptions());
         return confirmationLink;
     }
 
