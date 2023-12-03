@@ -2,10 +2,12 @@ using Blazored.LocalStorage;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.Text;
 using WebApp.Client.Pages;
 using WebApp.Client.Services.Implementations;
@@ -16,6 +18,7 @@ using WebApp.Data;
 using WebApp.Data.Entities;
 using WebApp.Filters;
 using WebApp.Middleware;
+using WebApp.Models.Validators;
 using WebApp.Services.Implementations;
 using WebApp.Services.Interfaces;
 
@@ -25,9 +28,13 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        ConfigureAppSettings(builder.Host, builder.Environment);
+        AddAppSettings(builder.Services, builder.Configuration);
         ConfigureServices(builder.Services, builder.Configuration);
 
         var app = builder.Build();
+        ConfigureRequestLocalization(app, builder.Configuration);
         AddConfigurations(app);
 
         app.Run();
@@ -36,24 +43,14 @@ internal class Program
     [Obsolete]
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services
-            .Configure<JwtTokenSettings>(configuration.GetSection(nameof(JwtTokenSettings)));
-
-        services
-            .Configure<EmailSenderSettings>(configuration.GetSection(nameof(EmailSenderSettings)));
-
-        services
-            .AddRazorComponents()
-            .AddInteractiveWebAssemblyComponents();
-
-
+        services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
         services.AddControllers(options =>
          {
              options.Filters.Add<ExceptionFilter>();
 
          }).AddFluentValidation(options =>
          {
-             //options.RegisterValidatorsFromAssemblyContaining<RegistrationRequestValidator>();
+             options.RegisterValidatorsFromAssemblyContaining<RegistrationRequestValidator>();
              options.DisableDataAnnotationsValidation = true;
              options.LocalizationEnabled = true;
          });
@@ -64,6 +61,42 @@ internal class Program
         JwtTokenConfiguration(services, configuration);
 
         AddApplicationServices(services);
+    }
+
+    private static void ConfigureAppSettings(IHostBuilder hostBuilder, IHostEnvironment environment)
+    {
+        hostBuilder.ConfigureAppConfiguration(config =>
+        {
+            config
+                .SetBasePath(environment.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+        });
+    }
+
+    private static void AddAppSettings(IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtTokenSettings>(configuration.GetSection(nameof(JwtTokenSettings)));
+        services.Configure<EmailSenderSettings>(configuration.GetSection(nameof(EmailSenderSettings)));
+        services.Configure<RequestLocalizationSettings>(configuration.GetSection(nameof(RequestLocalizationSettings)));
+    }
+
+    private static void ConfigureRequestLocalization(IApplicationBuilder app, IConfiguration configuration)
+    {
+        RequestLocalizationSettings requestLocalization = new();
+        configuration.GetSection(nameof(RequestLocalizationSettings)).Bind(requestLocalization);
+
+        IList<CultureInfo> supportedCultures = new List<CultureInfo>();
+        requestLocalization.SupportedCultures.ToList()
+            .ForEach(x => supportedCultures.Add(new CultureInfo(x)));
+
+        app.UseRequestLocalization(new RequestLocalizationOptions
+        {
+            DefaultRequestCulture = new RequestCulture(requestLocalization.DefaultRequestCulture),
+            SupportedCultures = supportedCultures,
+            SupportedUICultures = supportedCultures
+        });
     }
 
     private static void AddConfigurations(WebApplication app)
@@ -135,9 +168,6 @@ internal class Program
     {
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-
-        services.Configure<ApiBehaviorOptions>(options
-            => options.SuppressModelStateInvalidFilter = true);
     }
 
     private static void AddApplicationServices(IServiceCollection services)
