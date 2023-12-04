@@ -1,12 +1,10 @@
-﻿using System.Net.Http;
-using System;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using WebApp.Client.Services.Interfaces;
 using WebApp.Models;
 using WebApp.Models.Request;
 using WebApp.Models.Response;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.Net.Http.Headers;
+using static WebApp.Common.Constants;
 
 namespace WebApp.Client.Services.Implementations;
 
@@ -52,12 +50,23 @@ public class AccountClientService : IAccountClientService
         ResponseContent<LoginResponseModel>? responseContent = await responseMessage.Content
             .ReadFromJsonAsync<ResponseContent<LoginResponseModel>>();
 
-        //await _tokenService.SetAsync("jwt_token", responseContent!.Result.AccsesToken);
-        //((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(requestModel.Email);
-        //_httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", responseContent!.Result.AccsesToken);
+        if (responseContent!.Result is not null)
+        {
+            string accsesToken = responseContent!.Result.AccsesToken;
 
+            await _tokenService.SetAsync(TokenKey, accsesToken);
+            ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(accsesToken);
+            _httpClient.AddJwtToken(accsesToken);
+        }
 
         return responseContent!;
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _tokenService.RemoveAsync(TokenKey);
+        ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsLoggedOut();
+        _httpClient.RemoveJwtToken();
     }
 
     public async Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel)

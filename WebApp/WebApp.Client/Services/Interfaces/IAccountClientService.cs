@@ -10,6 +10,8 @@ public interface IAccountClientService
 
     Task<ResponseContent<LoginResponseModel>> LoginAsync(LoginRequestModel requestModel);
 
+    Task LogoutAsync();
+
     Task<ResponseContent> ConfirmEmailAsync(ConfirmEmailRequestModel requestModel);
 
     Task<ResponseContent> ResendEmailConfirmationAsync(string email);
