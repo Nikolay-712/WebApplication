@@ -19,4 +19,6 @@ public interface IAccountClientService
     Task<ResponseContent> ResetPasswordAsync(ResetPasswordRequestModel requestModel);
 
     Task<ResponseContent> ChangePasswordAsync(ChangePasswordRequestModel requestModel);
+
+    Task<ResponseContent<UserProfileResponseModel>> GetProfileAsync();
 }

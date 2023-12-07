@@ -1,4 +1,5 @@
-﻿using WebApp.Models.Request;
+﻿using System.Security.Claims;
+using WebApp.Models.Request;
 using WebApp.Models.Response;
 
 namespace WebApp.Services.Interfaces;
@@ -16,4 +17,6 @@ public interface IAccountService
     Task ResetPasswordAsync(ResetPasswordRequestModel requestModel);
 
     Task ChangePasswordAsync(ChangePasswordRequestModel requestModel);
+
+    Task<UserProfileResponseModel> GetProfileAsync(ClaimsPrincipal claimsPrincipal);
 }

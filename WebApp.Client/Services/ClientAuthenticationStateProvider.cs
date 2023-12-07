@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using WebApp.Client.Services.Implementations;
 using WebApp.Client.Services.Interfaces;
+using WebApp.Models;
 using static WebApp.Common.Constants;
 
 namespace WebApp.Client.Services;
@@ -9,13 +11,13 @@ namespace WebApp.Client.Services;
 public class ClientAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly ITokenService _tokenService;
-    private readonly HttpClient httpClient;
+    private readonly HttpClient _httpClient;
     private readonly ClaimsPrincipal _anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
 
-    public ClientAuthenticationStateProvider(ITokenService tokenService,HttpClient httpClient)
+    public ClientAuthenticationStateProvider(ITokenService tokenService, HttpClient httpClient)
     {
         _tokenService = tokenService;
-        this.httpClient = httpClient;
+        _httpClient = httpClient;
     }
 
     public async override Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -23,6 +25,16 @@ public class ClientAuthenticationStateProvider : AuthenticationStateProvider
         string token = await _tokenService.GetAsync(TokenKey);
         if (string.IsNullOrEmpty(token))
         {
+            return new AuthenticationState(_anonymousUser);
+        }
+
+        HttpResponseMessage responseMessage = await _httpClient.GetAsync($"{_httpClient.BaseAddress!.AbsoluteUri}api/authenticationState/validate/{token}");
+        var response = await responseMessage.Content.ReadFromJsonAsync<ResponseContent<bool>>();
+
+        if (!response!.Result)
+        {
+            await _tokenService.RemoveAsync(TokenKey);
+            MarkUserAsLoggedOut();
             return new AuthenticationState(_anonymousUser);
         }
 
@@ -34,7 +46,8 @@ public class ClientAuthenticationStateProvider : AuthenticationStateProvider
 
         ClaimsPrincipal authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(claims, "apiauth"));
         Task<AuthenticationState> authState = Task.FromResult(new AuthenticationState(authenticatedUser));
-        httpClient.AddJwtToken(token);
+        _httpClient.AddJwtToken(token);
+
         return await authState;
     }
 

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using WebApp.Models;
 using WebApp.Models.Request;
 using WebApp.Models.Response;
@@ -63,5 +65,18 @@ public class AccountsController : ControllerBase
     {
         await _accountService.ChangePasswordAsync(requestModel);
         return new ResponseContent();
+    }
+
+    [Authorize]
+    [HttpGet("profile")]
+    public async Task<ResponseContent<UserProfileResponseModel>> GetProfileAsync()
+    {
+        ClaimsPrincipal claims = this.User;
+        UserProfileResponseModel profileResponse = await _accountService.GetProfileAsync(claims);
+
+        return new ResponseContent<UserProfileResponseModel>()
+        {
+            Result = profileResponse,
+        };
     }
 }

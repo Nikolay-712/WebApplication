@@ -124,4 +124,17 @@ public class AccountClientService : IAccountClientService
         return responseContent!;
     }
 
+    public async Task<ResponseContent<UserProfileResponseModel>> GetProfileAsync()
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Get;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}profile");
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent<UserProfileResponseModel>? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent<UserProfileResponseModel>>();
+        return responseContent!;
+    }
+
 }

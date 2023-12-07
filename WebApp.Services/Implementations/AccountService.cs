@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 using System.Text;
 using WebApp.Common.Exceptions.ClientSide;
 using WebApp.Common.Exceptions.ServerSide;
 using WebApp.Common.Resources;
 using WebApp.Data;
 using WebApp.Data.Entities;
+using WebApp.Models.MappingExtensions;
 using WebApp.Models.Request;
 using WebApp.Models.Response;
 using WebApp.Services.Interfaces;
@@ -202,6 +204,19 @@ public class AccountService : IAccountService
             }
             throw new InvalidConfirmationException("Not succeeded reset password operation");
         }
+    }
+
+    public async Task<UserProfileResponseModel> GetProfileAsync(ClaimsPrincipal claimsPrincipal)
+    {
+        ApplicationUser? user = await _userManager.GetUserAsync(claimsPrincipal);
+        if (user is null)
+        {
+            _logger.LogError("Not found user");
+            throw new NotFoundUserException(Messages.UserNotFound);
+        }
+
+        UserProfileResponseModel profileResponse = user.ToUserProfileResponseModel();
+        return profileResponse;
     }
 
     private async Task<Uri> GenerateEmailConfirmationUri(ApplicationUser user)

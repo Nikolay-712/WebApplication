@@ -1,0 +1,27 @@
+﻿@page "/account/profile"
+@inject IAccountClientService _accountClient
+
+
+@attribute [Authorize]
+
+<h3>Profile</h3>
+
+@if (response.Result is not null)
+{
+
+    <h2>@response.Result.UserName</h2>
+    <h2>@response.Result.Email</h2>
+    <h2>@response.Result.CreatedOn</h2>
+}
+
+
+
+@code {
+    private ResponseContent<UserProfileResponseModel> response = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        response = await _accountClient.GetProfileAsync();
+
+    }
+}
