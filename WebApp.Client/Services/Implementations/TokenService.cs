@@ -8,7 +8,6 @@ namespace WebApp.Client.Services.Implementations;
 public class TokenService : ITokenService
 {
     private readonly ILocalStorageService _localStorage;
-
     private readonly JwtSecurityTokenHandler _tokenHandler;
 
     public TokenService(ILocalStorageService localStorage)

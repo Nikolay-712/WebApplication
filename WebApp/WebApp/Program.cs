@@ -1,17 +1,11 @@
-using Blazored.LocalStorage;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Text;
-using WebApp.Client.Pages;
-using WebApp.Client.Services.Implementations;
-using WebApp.Client.Services.Interfaces;
 using WebApp.Common.Configurations;
-using WebApp.Components;
 using WebApp.Data;
 using WebApp.Data.Entities;
 using WebApp.Filters;
@@ -19,6 +13,7 @@ using WebApp.Middleware;
 using WebApp.Models.Validators;
 using WebApp.Services.Implementations;
 using WebApp.Services.Interfaces;
+
 
 internal class Program
 {
@@ -41,7 +36,7 @@ internal class Program
     [Obsolete]
     private static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddRazorComponents().AddInteractiveWebAssemblyComponents();
+        services.AddRazorPages();
         services.AddControllers(options =>
          {
              options.Filters.Add<ExceptionFilter>();
@@ -116,16 +111,15 @@ internal class Program
 
         app.UseStaticFiles();
         app.UseMiddleware<TokenValidatorMiddleware>();
+        app.UseBlazorFrameworkFiles();
 
         app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();
         app.UseAntiforgery();
-
-        app.MapRazorComponents<App>()
-            .AddInteractiveWebAssemblyRenderMode()
-            .AddAdditionalAssemblies(typeof(Counter).Assembly);
+        app.MapControllers();
+        app.MapFallbackToFile("index.html");
     }
 
     private static void ApplicationContextConfiguration(IServiceCollection services, IConfiguration configuration)
@@ -173,12 +167,5 @@ internal class Program
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
-
-        //Client side
-        services.AddScoped<IAccountClientService, AccountClientService>();
-        services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7061/") });
-        services.AddBlazoredLocalStorage();
-        services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<AuthenticationStateProvider, ClientAuthenticationStateProvider>();
     }
 }

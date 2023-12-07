@@ -52,11 +52,11 @@ public class AccountClientService : IAccountClientService
 
         if (responseContent!.Result is not null)
         {
-            string accsesToken = responseContent!.Result.AccsesToken;
+            string token = responseContent!.Result.AccsesToken;
 
-            await _tokenService.SetAsync(TokenKey, accsesToken);
-            ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(accsesToken);
-            _httpClient.AddJwtToken(accsesToken);
+            await _tokenService.SetAsync(TokenKey, token);
+            ((ClientAuthenticationStateProvider)_authenticationStateProvider).MarkUserAsAuthenticated(token);
+            _httpClient.AddJwtToken(token);
         }
 
         return responseContent!;

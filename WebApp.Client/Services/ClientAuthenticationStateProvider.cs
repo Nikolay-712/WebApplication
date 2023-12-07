@@ -1,45 +1,41 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using WebApp.Client.Services.Implementations;
 using WebApp.Client.Services.Interfaces;
-using Microsoft.Extensions.Options;
-using WebApp.Common.Configurations;
 using static WebApp.Common.Constants;
 
-namespace WebApp.Client.Services.Implementations;
+namespace WebApp.Client.Services;
 
 public class ClientAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly ITokenService _tokenService;
+    private readonly HttpClient httpClient;
     private readonly ClaimsPrincipal _anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
 
-    public ClientAuthenticationStateProvider(ITokenService tokenService, IOptions<JwtTokenSettings> options)
+    public ClientAuthenticationStateProvider(ITokenService tokenService,HttpClient httpClient)
     {
         _tokenService = tokenService;
+        this.httpClient = httpClient;
     }
 
     public async override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        Task<string> tokenTask = await Task.FromResult(_tokenService.GetAsync(TokenKey));
-        if (tokenTask.Exception is null)
+        string token = await _tokenService.GetAsync(TokenKey);
+        if (string.IsNullOrEmpty(token))
         {
-            string token = await tokenTask;
-            if (string.IsNullOrEmpty(token))
-            {
-                return new AuthenticationState(_anonymousUser);
-            }
-
-            IEnumerable<Claim> claims = _tokenService.ReadToken(token);
-            if (claims is null)
-            {
-                return new AuthenticationState(_anonymousUser);
-            }
-
-            ClaimsPrincipal authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(claims, "apiauth"));
-            Task<AuthenticationState> authState = Task.FromResult(new AuthenticationState(authenticatedUser));
-            return await authState;
+            return new AuthenticationState(_anonymousUser);
         }
 
-        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        IEnumerable<Claim> claims = _tokenService.ReadToken(token);
+        if (claims is null)
+        {
+            return new AuthenticationState(_anonymousUser);
+        }
+
+        ClaimsPrincipal authenticatedUser = new ClaimsPrincipal(new ClaimsIdentity(claims, "apiauth"));
+        Task<AuthenticationState> authState = Task.FromResult(new AuthenticationState(authenticatedUser));
+        httpClient.AddJwtToken(token);
+        return await authState;
     }
 
     public void MarkUserAsAuthenticated(string token)
