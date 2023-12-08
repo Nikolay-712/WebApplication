@@ -27,6 +27,12 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
+    <script>
+        window.appCulture = {
+            get: () => window.localStorage['AppLanguage'],
+            set: (value) => window.localStorage['AppLanguage'] = value
+        };
+    </script>
 </body>
 
 </html>

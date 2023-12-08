@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Common", "WebApp.Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Models", "WebApp.Models\WebApp.Models.csproj", "{86D59033-8F5A-4472-B928-1FE1F6487F94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp.Client", "WebApp.Client\WebApp.Client.csproj", "{397D6FB5-9041-4EE6-858F-5CB345D3158A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp.Client", "WebApp.Client\WebApp.Client.csproj", "{397D6FB5-9041-4EE6-858F-5CB345D3158A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
