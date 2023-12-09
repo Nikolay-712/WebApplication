@@ -141,6 +141,15 @@
   <data name="PasswordMismatch" xml:space="preserve">
     <value>Паролите не съвпадат</value>
   </data>
+  <data name="RoleCurrentlyUse" xml:space="preserve">
+    <value>Не може да премахне ролята, в момента се използва</value>
+  </data>
+  <data name="RoleNameAlreadyExists" xml:space="preserve">
+    <value>Вече има записана роля с това име</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Ролята не е намерена</value>
+  </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>Има потребител с тoва име</value>
   </data>

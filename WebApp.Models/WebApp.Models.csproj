@@ -15,4 +15,8 @@
     <ProjectReference Include="..\WebApp.Data\WebApp.Data.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Request\Accounts\" />
+  </ItemGroup>
+
 </Project>

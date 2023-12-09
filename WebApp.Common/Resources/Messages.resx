@@ -141,10 +141,19 @@
   <data name="PasswordMismatch" xml:space="preserve">
     <value>Passwords do not match</value>
   </data>
+  <data name="RoleCurrentlyUse" xml:space="preserve">
+    <value>Can't remove the role, it is currently in use</value>
+  </data>
+  <data name="RoleNameAlreadyExists" xml:space="preserve">
+    <value>Role name already exists</value>
+  </data>
+  <data name="RoleNotFound" xml:space="preserve">
+    <value>Not found role</value>
+  </data>
   <data name="UserNameAlreadyExists" xml:space="preserve">
     <value>User name already exists</value>
   </data>
   <data name="UserNotFound" xml:space="preserve">
-    <value>User not found</value>
+    <value>Not found user</value>
   </data>
 </root>

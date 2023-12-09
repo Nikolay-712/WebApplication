@@ -167,5 +167,6 @@ internal class Program
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IJwtTokenManager, JwtTokenManager>();
         services.AddScoped<IEmailSenderService, EmailSenderService>();
+        services.AddScoped<IRoleService, RoleService>();
     }
 }
