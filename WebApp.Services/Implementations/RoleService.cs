@@ -87,7 +87,7 @@ public class RoleService : IRoleService
 
 
         IdentityResult identityResult = await _roleManager.UpdateAsync(role);
-        if (identityResult.Succeeded)
+        if (!identityResult.Succeeded)
         {
             _logger.LogError(identityResult.DisplayIdentityResultErrorMessages());
             throw new InvalidIdentityResultException(Messages.GeneralErrorMessage);
