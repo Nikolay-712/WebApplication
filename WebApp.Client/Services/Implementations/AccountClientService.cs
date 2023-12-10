@@ -1,10 +1,10 @@
 ﻿using System.Net.Http.Json;
 using WebApp.Client.Services.Interfaces;
 using WebApp.Models;
-using WebApp.Models.Request;
 using WebApp.Models.Response;
 using Microsoft.AspNetCore.Components.Authorization;
 using static WebApp.Common.Constants;
+using WebApp.Models.Request.Accounts;
 
 namespace WebApp.Client.Services.Implementations;
 

@@ -1,4 +1,4 @@
-﻿namespace WebApp.Models.Request;
+﻿namespace WebApp.Models.Request.Accounts;
 
 public class ChangePasswordRequestModel
 {

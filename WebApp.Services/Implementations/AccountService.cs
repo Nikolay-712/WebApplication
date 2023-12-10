@@ -10,7 +10,7 @@ using WebApp.Common.Resources;
 using WebApp.Data;
 using WebApp.Data.Entities;
 using WebApp.Models.MappingExtensions;
-using WebApp.Models.Request;
+using WebApp.Models.Request.Accounts;
 using WebApp.Models.Response;
 using WebApp.Services.Interfaces;
 

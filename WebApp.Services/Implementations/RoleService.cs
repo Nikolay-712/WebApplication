@@ -17,12 +17,20 @@ namespace WebApp.Services.Implementations;
 public class RoleService : IRoleService
 {
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserService _userService;
     private readonly ApplicationContext _applicationContext;
     private readonly ILogger<RoleService> _logger;
 
-    public RoleService(RoleManager<ApplicationRole> roleManager, ApplicationContext applicationContext, ILogger<RoleService> logger)
+    public RoleService(RoleManager<ApplicationRole> roleManager,
+        UserManager<ApplicationUser> userManager,
+        IUserService userService,
+        ApplicationContext applicationContext,
+        ILogger<RoleService> logger)
     {
         _roleManager = roleManager;
+        _userManager = userManager;
+        _userService = userService;
         _applicationContext = applicationContext;
         _logger = logger;
     }
@@ -112,6 +120,50 @@ public class RoleService : IRoleService
             _logger.LogError(identityResult.DisplayIdentityResultErrorMessages());
             throw new InvalidIdentityResultException(Messages.GeneralErrorMessage);
         }
+    }
+
+    public async Task AssignUserToRoleAsync(AssignToRoleRequestModel requestModel)
+    {
+        ApplicationUser user = await _userService.GetByIdAsync(requestModel.UserId);
+        ApplicationRole role = await FindByIdAsync(requestModel.RoleId);
+
+        bool isInRole = await _userManager.IsInRoleAsync(user, role.Name!);
+        if (isInRole)
+        {
+            _logger.LogError("User with ID : {userId} is in role with ID : {roleId}", requestModel.UserId, requestModel.RoleId);
+            throw new UserRoleExistsException(Messages.UserRoleExists);
+        }
+
+        IdentityResult identityResult = await _userManager.AddToRoleAsync(user, role.Name!);
+        if (!identityResult.Succeeded)
+        {
+            _logger.LogError(identityResult.DisplayIdentityResultErrorMessages());
+            throw new InvalidIdentityResultException(Messages.GeneralErrorMessage);
+        }
+
+        _logger.LogInformation("Succeeded assign user with ID : {userId} to role with ID : {roleId}", requestModel.UserId, requestModel.RoleId);
+    }
+
+    public async Task RemoveUserFromRoleAsync(RemoveFromRoleRequestModel requestModel)
+    {
+        ApplicationUser user = await _userService.GetByIdAsync(requestModel.UserId);
+        ApplicationRole role = await FindByIdAsync(requestModel.RoleId);
+
+        bool isInRole = await _userManager.IsInRoleAsync(user, role.Name!);
+        if (!isInRole)
+        {
+            _logger.LogError("User with ID : {userId} is not in role with ID : {roleId}", requestModel.UserId, requestModel.RoleId);
+            throw new UserNotInRoleException(Messages.UserNotInRole);
+        }
+
+        IdentityResult identityResult = await _userManager.RemoveFromRoleAsync(user, role.Name!);
+        if (!identityResult.Succeeded)
+        {
+            _logger.LogError(identityResult.DisplayIdentityResultErrorMessages());
+            throw new InvalidIdentityResultException(Messages.GeneralErrorMessage);
+        }
+
+        _logger.LogInformation("Succeeded remove user with ID : {userId} from role with ID : {roleId}", requestModel.UserId, requestModel.RoleId);
     }
 
     private async Task<ApplicationRole> FindByIdAsync(Guid id)

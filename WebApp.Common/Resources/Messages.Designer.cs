@@ -176,5 +176,23 @@ namespace WebApp.Common.Resources {
                 return ResourceManager.GetString("UserNotFound", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The current user has no such role.
+        /// </summary>
+        public static string UserNotInRole {
+            get {
+                return ResourceManager.GetString("UserNotInRole", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The current user already has this role.
+        /// </summary>
+        public static string UserRoleExists {
+            get {
+                return ResourceManager.GetString("UserRoleExists", resourceCulture);
+            }
+        }
     }
 }

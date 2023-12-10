@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using WebApp.Common.Resources;
-using WebApp.Models.Request;
+using WebApp.Models.Request.Accounts;
 
 namespace WebApp.Models.Validators;
 

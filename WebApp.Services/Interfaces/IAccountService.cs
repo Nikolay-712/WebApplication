@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-using WebApp.Models.Request;
+using WebApp.Models.Request.Accounts;
 using WebApp.Models.Response;
 
 namespace WebApp.Services.Interfaces;

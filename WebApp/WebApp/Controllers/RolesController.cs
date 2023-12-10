@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 using WebApp.Models.Request.Roles;
 using WebApp.Models.Response.Roles;
+using WebApp.Models.Validators;
 using WebApp.Services.Interfaces;
+using static WebApp.Common.Constants;
 
 namespace WebApp.Controllers;
 
+[Authorize(Roles = SuperAdminRoleName)]
 [Route("api/[controller]")]
 [ApiController]
 public class RolesController : ControllerBase
@@ -55,6 +59,20 @@ public class RolesController : ControllerBase
     public async Task<ResponseContent> RemoveAsync([FromRoute] Guid id)
     {
         await _roleService.RemoveAsync(id);
+        return new ResponseContent();
+    }
+
+    [HttpPost("assign-user")]
+    public async Task<ResponseContent> AssignUserToRoleAsync([FromBody] AssignToRoleRequestModel requestModel)
+    {
+        await _roleService.AssignUserToRoleAsync(requestModel);
+        return new ResponseContent();
+    }
+
+    [HttpPost("remove-user")]
+    public async Task<ResponseContent> RemoveUserFromRoleAsync([FromBody] RemoveFromRoleRequestModel requestModel)
+    {
+        await _roleService.RemoveUserFromRoleAsync(requestModel);
         return new ResponseContent();
     }
 }

@@ -1,6 +1,6 @@
-﻿using WebApp.Models.Request;
-using WebApp.Models;
+﻿using WebApp.Models;
 using WebApp.Models.Response;
+using WebApp.Models.Request.Accounts;
 
 namespace WebApp.Client.Services.Interfaces;
 

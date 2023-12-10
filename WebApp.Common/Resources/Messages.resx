@@ -156,4 +156,10 @@
   <data name="UserNotFound" xml:space="preserve">
     <value>Not found user</value>
   </data>
+  <data name="UserNotInRole" xml:space="preserve">
+    <value>The current user has no such role</value>
+  </data>
+  <data name="UserRoleExists" xml:space="preserve">
+    <value>The current user already has this role</value>
+  </data>
 </root>

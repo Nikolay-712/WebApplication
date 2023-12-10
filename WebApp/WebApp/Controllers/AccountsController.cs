@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using WebApp.Models;
-using WebApp.Models.Request;
+using WebApp.Models.Request.Accounts;
 using WebApp.Models.Response;
 using WebApp.Services.Interfaces;
 

@@ -14,4 +14,8 @@ public interface IRoleService
     Task UpdateAsync(Guid id, UpdateRoleRequestModel requestModel);
 
     Task RemoveAsync(Guid id);
+
+    Task AssignUserToRoleAsync(AssignToRoleRequestModel requestModel);
+
+    Task RemoveUserFromRoleAsync(RemoveFromRoleRequestModel requestModel);
 }

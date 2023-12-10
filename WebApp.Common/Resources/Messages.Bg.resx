@@ -156,4 +156,10 @@
   <data name="UserNotFound" xml:space="preserve">
     <value>Потребителят не е намерен</value>
   </data>
+  <data name="UserNotInRole" xml:space="preserve">
+    <value>Текущият потребител няма такава роля</value>
+  </data>
+  <data name="UserRoleExists" xml:space="preserve">
+    <value>Потребителят вече е добавен към тази роля</value>
+  </data>
 </root>
