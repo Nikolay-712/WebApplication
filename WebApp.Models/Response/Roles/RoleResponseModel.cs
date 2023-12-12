@@ -2,6 +2,8 @@
 
 public class RoleResponseModel
 {
+    public Guid Id { get; set; }
+
     public string Name { get; set; }
 
     public string CreatedOn { get; set; }

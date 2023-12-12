@@ -31,6 +31,8 @@ if (appLanguage != null)
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
+
+builder.Services.AddScoped<IRoleClientService, RoleClientService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountClientService, AccountClientService>();
 builder.Services.AddScoped<AuthenticationStateProvider, ClientAuthenticationStateProvider>();

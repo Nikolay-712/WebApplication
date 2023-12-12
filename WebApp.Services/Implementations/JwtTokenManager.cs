@@ -29,23 +29,26 @@ public class JwtTokenManager : IJwtTokenManager
         byte[] key = Encoding.ASCII.GetBytes(_jwtTokenSettings.Key);
         IList<string> roles = await _userManager.GetRolesAsync(user);
 
-        SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
+
+        IList<Claim> userClaims =
+        [
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.UserName!),
+            new Claim(ClaimTypes.Email, user.Email!)
+        ];
+
+        foreach (string role in roles)
         {
-            Audience = _jwtTokenSettings.Audience,
-            Issuer = _jwtTokenSettings.Issuer,
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.Name,user.UserName!)
-            }),
-            Expires = DateTime.UtcNow.AddHours(1),
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
+            userClaims.Add(new Claim(ClaimTypes.Role, role));
+        }
 
-        tokenDescriptor.Subject.AddClaims(roles.Select(x => new Claim(ClaimTypes.Role, x)));
+        JwtSecurityToken token = new(
+            issuer: _jwtTokenSettings.Issuer,
+            audience: _jwtTokenSettings.Audience,
+            claims: userClaims,
+            expires: DateTime.Now.AddDays(1),
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature));
 
-        SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(token);
     }
 

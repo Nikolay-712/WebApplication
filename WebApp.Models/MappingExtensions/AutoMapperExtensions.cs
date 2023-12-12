@@ -20,6 +20,7 @@ public static class AutoMapperExtensions
     {
         return new RoleResponseModel
         {
+            Id = role.Id,
             Name = role.Name!,
             CreatedOn = role.CreatedOn.ToString("dd.MM.yyyy"),
             DescriptionBg = role.DescriptionBg,
