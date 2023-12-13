@@ -1,93 +1,110 @@
 ﻿@page "/administration/roles/create"
-@using WebApp.Models.Response.Roles
 @inject IRoleClientService _roleClient
+@inject IDialogService _dialogService
 
 @attribute [Authorize(Roles = "Super admin")]
 
 <div class="row">
-    <div class="col-md-4">
-        <section>
-            <h4>Add new role</h4>
-            <hr/>
-            <EditForm Model="RequestModel" method="post" OnValidSubmit="CreateAsync">
-                <FluentValidationValidator />
-
+    <div class="col-md-5">
+        <MudCard>
+            <MudForm Model="@RequestModel" @ref="@form" Validation="@(validator.ValidateValue)" ValidationDelay="0">
                 <DisplayErrorMessage Message="@ErrorMessage" />
+                <MudSpacer />
+                <MudCardContent>
+                    <MudTextField @bind-Value="RequestModel.Name"
+                                  For="@(() => RequestModel.Name)"
+                                  Immediate="true"
+                                  Label="Role name" />
 
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RequestModel.Name" class="form-control" autocomplete="Name" aria-required="true" placeholder="super admin" />
-                    <label for="name" class="form-label">Role name</label>
-                    <ValidationMessage For="() => RequestModel.Name" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputTextArea @bind-Value="RequestModel.DescriptionEn" class="form-control" autocomplete="Description" aria-required="true" placeholder="new description text" />
-                    <label for="description" class="form-label">Description</label>
-                    <ValidationMessage For="() => RequestModel.DescriptionEn" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputTextArea @bind-Value="RequestModel.DescriptionBg" class="form-control" autocomplete="Description" aria-required="true" placeholder="new description text" />
-                    <label for="description" class="form-label">Description</label>
-                    <ValidationMessage For="() => RequestModel.DescriptionBg" class="text-danger" />
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Create</button>
-                </div>
-            </EditForm>
-        </section>
+                    <MudTextField Lines="5" @bind-Value="RequestModel.DescriptionEn"
+                                  For="@(() => RequestModel.DescriptionEn)"
+                                  Immediate="true"
+                                  Label="Description En" />
+
+                    <MudTextField Lines="5" @bind-Value="RequestModel.DescriptionBg"
+                                  For="@(() => RequestModel.DescriptionBg)"
+                                  Immediate="true"
+                                  Label="Description Bg" />
+                </MudCardContent>
+            </MudForm>
+            <MudCardActions>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Class="ml-auto"
+                           OnClick="@(async () => await CreateAsync())">
+                    Create
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-md-7">
         @if (AllRolesResponse.Result is not null)
         {
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Created on</th>
-                        <th>Name</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <MudDataGrid T="RoleResponseModel" Items="@AllRolesResponse.Result">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">All roles</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="_searchString"
+                                  Placeholder="Search"
+                                  Adornment="Adornment.Start"
+                                  Immediate="true"
+                                  AdornmentIcon="@Icons.Material.Filled.Search"
+                                  IconSize="Size.Medium"
+                                  Class="mt-0">
+                    </MudTextField>
+                </ToolBarContent>
+                <Columns>
+                    <PropertyColumn Property="role => role.CreatedOn" Title="Created on" Sortable="false" Filterable="false" />
+                    <PropertyColumn Property="role => role.Name" Title="Role name" Sortable="false" Filterable="false" />
+                    <TemplateColumn CellClass="d-flex justify-end">
 
-                    @foreach (var role in AllRolesResponse.Result)
-                    {
-                        <tr>
-                            <td>@role.CreatedOn</td>
-                            <td>@role.Name</td>
-                            <td><button class="btn btn-primary btn btn-sm" @onclick="() => GetDetailsAsync(role.Id)">Details</button></td>
-                            <td><button class="btn btn-danger btn btn-sm" @onclick="() => RemoveAsync(role.Id)">Remove</button></td>
-                        </tr>
+                        <CellTemplate>
+                            <MudIconButton Icon="@Icons.Material.Filled.Info"
+                                           Color="Color.Primary" aria-label="Details"
+                                           OnClick="() => GetDetailsAsync(context.Item.Id)">
+                            </MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Success" aria-label="Edit">
+                            </MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove"
+                                           Color="Color.Error" aria-label="Remove"
+                                           OnClick="() => RemoveAsync(context.Item.Id)">
 
-                    }
-                </tbody>
-            </table>
+                            </MudIconButton>
+                        </CellTemplate>
+                    </TemplateColumn>
+                </Columns>
+            </MudDataGrid>
+
+            @if (DetailsResponseModel.Result is not null)
+            {
+                <MudPopover Open="@_isOpen" Fixed="false" Class="px-4 pt-4">
+                    <div class="d-flex flex-column">
+                        <MudText>@DetailsResponseModel.Result.Name</MudText>
+                            <MudText>@DetailsResponseModel.Result.CreatedOn</MudText>
+                            <MudText>@DetailsResponseModel.Result.DescriptionBg</MudText>
+                            <MudText>@DetailsResponseModel.Result.DescriptionEn</MudText>
+
+                            <MudButton OnClick="@ToggleOpen"
+                                       Class="ml-auto mr-n3 mb-1"
+                                       Color="Color.Error">
+                                Close
+                            </MudButton>
+                        </div>
+                    </MudPopover>
+            }
         }
     </div>
-    @if (DetailsResponseModel.Result is not null)
-    {
-        <div class="modal fade show" id="myModal" style="display:block; background-color: rgba(10,10,10,.8);" aria-modal="true" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Details</h4>
-                        <button type="button" class="close" @onclick="@ModalClose">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <p>@DetailsResponseModel.Result.CreatedOn</p>
-                        <p>@DetailsResponseModel.Result.Name</p>
-                        <p>@DetailsResponseModel.Result.DescriptionEn</p>
-                        <p>@DetailsResponseModel.Result.DescriptionBg</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button class="btn btn-primary btn btn-sm" @onclick="() => UpdateAsync(DetailsResponseModel.Result.Id)">Update</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    }
 
 </div>
 
 @code {
+
+    MudForm? form;
+    CreteRoleRequestValidator validator = new();
+    string state = "Message box hasn't been opened yet";
+
     private ResponseContent CreateResponseContent = new();
     private ResponseContent<IReadOnlyList<RoleResponseModel>> AllRolesResponse = new();
     private ResponseContent<RoleResponseModel> DetailsResponseModel = new();
@@ -104,45 +121,67 @@
 
     private async Task CreateAsync()
     {
-        CreateResponseContent = await _roleClient.CreateAsync(RequestModel);
-        if (CreateResponseContent.ErrorResponse is not null)
-        {
-            ErrorMessage = CreateResponseContent.ErrorResponse.Message;
-            return;
-        }
+        await form!.Validate();
 
-        ErrorMessage = string.Empty;
-        RequestModel = new();
-        AllRolesResponse = await _roleClient.GetAllAsync();
+        if (form.IsValid)
+        {
+            CreateResponseContent = await _roleClient.CreateAsync(RequestModel);
+            if (CreateResponseContent.ErrorResponse is not null)
+            {
+                ErrorMessage = CreateResponseContent.ErrorResponse.Message;
+                return;
+            }
+
+            ErrorMessage = string.Empty;
+            RequestModel = new();
+            AllRolesResponse = await _roleClient.GetAllAsync();
+        }
     }
 
     private async Task GetDetailsAsync(Guid id)
     {
+        if (_isOpen)
+            _isOpen = false;
+        else
+            _isOpen = true;
         DetailsResponseModel = await _roleClient.GetDetailsAsync(id);
     }
 
     private async Task RemoveAsync(Guid id)
     {
-        RemoveResponseContent = await _roleClient.RemoveAsync(id);
-        if (RemoveResponseContent.ErrorResponse is not null)
+        RoleResponseModel? role = AllRolesResponse.Result.FirstOrDefault(x => x.Id == id);
+        bool? result = await _dialogService.ShowMessageBox(
+            "Delete",
+            $"Are you sure you want to delete role with name {role.Name}?",
+            yesText: "Delete!", cancelText: "Cancel");
+
+        state = result == null ? "Canceled" : "Deleted";
+        StateHasChanged();
+
+        if (state == "Deleted")
         {
-            ErrorMessage = RemoveResponseContent.ErrorResponse.Message;
-            return;
+            RemoveResponseContent = await _roleClient.RemoveAsync(id);
+            if (RemoveResponseContent.ErrorResponse is not null)
+            {
+                ErrorMessage = RemoveResponseContent.ErrorResponse.Message;
+                return;
+            }
+
+            ErrorMessage = string.Empty;
+            RequestModel = new();
+            AllRolesResponse = await _roleClient.GetAllAsync();
         }
 
-        ErrorMessage = string.Empty;
-        RequestModel = new();
-        AllRolesResponse = await _roleClient.GetAllAsync();
     }
+    private string _searchString;
 
-    private async Task UpdateAsync(Guid id)
+    public bool _isOpen;
+
+    public void ToggleOpen()
     {
-        Console.WriteLine("Updating......");
+        if (_isOpen)
+            _isOpen = false;
+        else
+            _isOpen = true;
     }
-
-    private void ModalClose()
-    {
-        DetailsResponseModel = new();
-    }
-
 }
