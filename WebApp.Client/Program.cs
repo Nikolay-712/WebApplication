@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.JSInterop;
+using MudBlazor.Services;
 using System.Globalization;
 using WebApp.Client;
 using WebApp.Client.Services;
@@ -31,6 +32,7 @@ if (appLanguage != null)
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IRoleClientService, RoleClientService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
