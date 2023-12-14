@@ -1,0 +1,69 @@
+﻿@inject IRoleClientService _roleClient
+
+<MudDialog>
+    <DialogContent>
+        <MudForm Model="@UpdateRequest" @ref="@form"
+                 Validation="@(validator.ValidateValue)"
+                 ValidationDelay="0">
+            <DisplayErrorMessage Message="@ErrorMessage" />
+            <MudSpacer />
+            <MudCardContent>
+                <MudTextField @bind-Value="UpdateRequest.Name"
+                              For="@(() => UpdateRequest.Name)"
+                              Immediate="true"
+                              Label="Role name" />
+
+                <MudTextField Lines="5" @bind-Value="UpdateRequest.DescriptionEn"
+                              For="@(() => UpdateRequest.DescriptionEn)"
+                              Immediate="true"
+                              Label="Description En" />
+
+                <MudTextField Lines="5" @bind-Value="UpdateRequest.DescriptionBg"
+                              For="@(() => UpdateRequest.DescriptionBg)"
+                              Immediate="true"
+                              Label="Description Bg" />
+            </MudCardContent>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="UpdateAsync">Update</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public RoleResponseModel RoleResponseModel { get; set; }
+    ResponseContent ResponseContent = new();
+
+    private string ErrorMessage = string.Empty;
+
+    void Cancel() => MudDialog.Cancel();
+
+    protected override void OnParametersSet()
+    {
+        UpdateRequest.Name = RoleResponseModel.Name;
+        UpdateRequest.DescriptionEn = RoleResponseModel.DescriptionEn;
+        UpdateRequest.DescriptionBg = RoleResponseModel.DescriptionBg;
+    }
+
+    UpdateRoleRequestModel UpdateRequest = new();
+    UpdateRoleRequestValidator validator = new();
+    MudForm? form;
+
+    private async Task UpdateAsync()
+    {
+        await form!.Validate();
+        if (form.IsValid)
+        {
+            ResponseContent = await _roleClient.UpdateAsync(RoleResponseModel.Id, UpdateRequest);
+            if (ResponseContent.ErrorResponse is not null)
+            {
+                ErrorMessage = ResponseContent!.ErrorResponse.Message;
+                return;
+            }
+
+            MudDialog.Close(DialogResult.Ok("Updated"));
+        }
+    }
+}

@@ -32,4 +32,12 @@ public class UpdateRoleRequestValidator : AbstractValidator<UpdateRoleRequestMod
             .Length(10, 200)
             .WithMessage(Messages.InvalidLengthRange);
     }
+
+    public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+    {
+        var result = await ValidateAsync(ValidationContext<UpdateRoleRequestModel>.CreateWithOptions((UpdateRoleRequestModel)model, x => x.IncludeProperties(propertyName)));
+        if (result.IsValid)
+            return Array.Empty<string>();
+        return result.Errors.Select(e => e.ErrorMessage);
+    };
 }

@@ -22,4 +22,8 @@
     <ProjectReference Include="..\WebApp.Models\WebApp.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Pages\Shared\Dialogs\" />
+  </ItemGroup>
+
 </Project>

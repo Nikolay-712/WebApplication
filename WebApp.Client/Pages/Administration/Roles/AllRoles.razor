@@ -7,7 +7,9 @@
 <div class="row">
     <div class="col-md-5">
         <MudCard>
-            <MudForm Model="@RequestModel" @ref="@form" Validation="@(validator.ValidateValue)" ValidationDelay="0">
+            <MudForm Model="@RequestModel" @ref="@form"
+                     Validation="@(validator.ValidateValue)"
+                     ValidationDelay="0">
                 <DisplayErrorMessage Message="@ErrorMessage" />
                 <MudSpacer />
                 <MudCardContent>
@@ -45,7 +47,7 @@
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">All roles</MudText>
                     <MudSpacer />
-                    <MudTextField @bind-Value="_searchString"
+                    <MudTextField @bind-Value="SearchString"
                                   Placeholder="Search"
                                   Adornment="Adornment.Start"
                                   Immediate="true"
@@ -62,10 +64,11 @@
                         <CellTemplate>
                             <MudIconButton Icon="@Icons.Material.Filled.Info"
                                            Color="Color.Primary" aria-label="Details"
-                                           OnClick="() => GetDetailsAsync(context.Item.Id)">
+                                           @onclick="() => GetDetailsAsync(context.Item.Id)">
                             </MudIconButton>
                             <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                           Color="Color.Success" aria-label="Edit">
+                                           Color="Color.Success" aria-label="Edit"
+                                           @onclick="() => UpdateAsync(context.Item.Id)">
                             </MudIconButton>
                             <MudIconButton Icon="@Icons.Material.Filled.Remove"
                                            Color="Color.Error" aria-label="Remove"
@@ -76,53 +79,29 @@
                     </TemplateColumn>
                 </Columns>
             </MudDataGrid>
-
-            @if (DetailsResponseModel.Result is not null)
-            {
-                <MudPopover Open="@_isOpen" Fixed="false" Class="px-4 pt-4">
-                    <div class="d-flex flex-column">
-                        <MudText>@DetailsResponseModel.Result.Name</MudText>
-                            <MudText>@DetailsResponseModel.Result.CreatedOn</MudText>
-                            <MudText>@DetailsResponseModel.Result.DescriptionBg</MudText>
-                            <MudText>@DetailsResponseModel.Result.DescriptionEn</MudText>
-
-                            <MudButton OnClick="@ToggleOpen"
-                                       Class="ml-auto mr-n3 mb-1"
-                                       Color="Color.Error">
-                                Close
-                            </MudButton>
-                        </div>
-                    </MudPopover>
-            }
         }
     </div>
-
 </div>
 
 @code {
 
-    MudForm? form;
-    CreteRoleRequestValidator validator = new();
-    string state = "Message box hasn't been opened yet";
-
-    private ResponseContent CreateResponseContent = new();
-    private ResponseContent<IReadOnlyList<RoleResponseModel>> AllRolesResponse = new();
-    private ResponseContent<RoleResponseModel> DetailsResponseModel = new();
-    private ResponseContent RemoveResponseContent = new();
-
-    private CreateRoleRequestModel RequestModel = new();
-
+    private string SearchString = string.Empty;
     private string ErrorMessage = string.Empty;
+    private ResponseContent<IReadOnlyList<RoleResponseModel>> AllRolesResponse = new();
 
     protected override async Task OnInitializedAsync()
     {
         AllRolesResponse = await _roleClient.GetAllAsync();
     }
 
+    MudForm? form;
+    private CreateRoleRequestModel RequestModel = new();
+    private CreteRoleRequestValidator validator = new();
+    private ResponseContent CreateResponseContent = new();
+
     private async Task CreateAsync()
     {
         await form!.Validate();
-
         if (form.IsValid)
         {
             CreateResponseContent = await _roleClient.CreateAsync(RequestModel);
@@ -138,27 +117,58 @@
         }
     }
 
+    private ResponseContent<RoleResponseModel> DetailsResponseModel = new();
+
     private async Task GetDetailsAsync(Guid id)
     {
-        if (_isOpen)
-            _isOpen = false;
-        else
-            _isOpen = true;
         DetailsResponseModel = await _roleClient.GetDetailsAsync(id);
+        if (DetailsResponseModel.ErrorResponse is not null)
+        {
+            ErrorMessage = DetailsResponseModel.ErrorResponse.Message;
+            return;
+        }
+
+        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        DialogParameters parameters = new DialogParameters<RoleDetailsDialog> { { x => x.RoleResponseModel, DetailsResponseModel.Result } };
+        _dialogService.Show<RoleDetailsDialog>("Role Details", parameters, maxWidth);
     }
+
+    private async Task UpdateAsync(Guid id)
+    {
+        DetailsResponseModel = await _roleClient.GetDetailsAsync(id);
+        if (DetailsResponseModel.ErrorResponse is not null)
+        {
+            ErrorMessage = DetailsResponseModel.ErrorResponse.Message;
+            return;
+        }
+
+        DialogOptions maxWidth = new DialogOptions() { MaxWidth = MaxWidth.Medium, FullWidth = true };
+        DialogParameters parameters = new DialogParameters<RoleDetailsDialog> { { x => x.RoleResponseModel, DetailsResponseModel.Result } };
+        var dialog = _dialogService.Show<EditRoleDialog>("Update Role", parameters, maxWidth);
+
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            AllRolesResponse = await _roleClient.GetAllAsync();
+        }
+    }
+
+    string State = "Message box hasn't been opened yet";
+    private ResponseContent RemoveResponseContent = new();
 
     private async Task RemoveAsync(Guid id)
     {
         RoleResponseModel? role = AllRolesResponse.Result.FirstOrDefault(x => x.Id == id);
         bool? result = await _dialogService.ShowMessageBox(
             "Delete",
-            $"Are you sure you want to delete role with name {role.Name}?",
+            $"Are you sure you want to delete role with name {role!.Name}?",
             yesText: "Delete!", cancelText: "Cancel");
 
-        state = result == null ? "Canceled" : "Deleted";
+        State = result == null ? "Canceled" : "Deleted";
         StateHasChanged();
 
-        if (state == "Deleted")
+        if (State == "Deleted")
         {
             RemoveResponseContent = await _roleClient.RemoveAsync(id);
             if (RemoveResponseContent.ErrorResponse is not null)
@@ -171,17 +181,5 @@
             RequestModel = new();
             AllRolesResponse = await _roleClient.GetAllAsync();
         }
-
-    }
-    private string _searchString;
-
-    public bool _isOpen;
-
-    public void ToggleOpen()
-    {
-        if (_isOpen)
-            _isOpen = false;
-        else
-            _isOpen = true;
     }
 }

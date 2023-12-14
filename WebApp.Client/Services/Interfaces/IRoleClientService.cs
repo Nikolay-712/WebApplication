@@ -12,5 +12,7 @@ public interface IRoleClientService
 
     Task<ResponseContent<RoleResponseModel>> GetDetailsAsync(Guid id);
 
+    Task<ResponseContent> UpdateAsync(Guid id, UpdateRoleRequestModel requestModel);
+
     Task<ResponseContent> RemoveAsync(Guid id);
 }

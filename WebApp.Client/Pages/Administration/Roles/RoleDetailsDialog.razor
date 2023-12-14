@@ -1,0 +1,18 @@
+﻿<MudDialog>
+    <DialogContent>
+        <p>@RoleResponseModel.Name</p>
+        <p>@RoleResponseModel.CreatedOn</p>
+        <p>@RoleResponseModel.DescriptionEn</p>
+        <p>@RoleResponseModel.DescriptionBg</p>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    [Parameter] public RoleResponseModel RoleResponseModel { get; set; }
+
+    void Cancel() => MudDialog.Cancel();
+}

@@ -57,6 +57,20 @@ public class RoleClientService : IRoleClientService
         return responseContent!;
     }
 
+    public async Task<ResponseContent> UpdateAsync(Guid id, UpdateRoleRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Put;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}update/{id}");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent<RoleResponseModel>? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent<RoleResponseModel>>();
+        return responseContent!;
+    }
+
     public async Task<ResponseContent> RemoveAsync(Guid id)
     {
         using HttpRequestMessage requestMessage = new();
