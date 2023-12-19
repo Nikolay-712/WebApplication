@@ -1,0 +1,68 @@
+﻿@page "/administration/users/all"
+@using WebApp.Models.Request.Users
+@using WebApp.Models.Response.Users
+@inject IUserClientService _userClient;
+
+<MudGrid>
+    <MudItem xs="12" sm="6">
+        <MudTextField Label="Search" Placeholder="Type to search..."
+                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Value="@searchTerm" OnInput="OnSearchInput" />
+
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudSelect T="int" @bind-Value="itemsPerPage" Label="Items per page" oninput="Change" Dense>
+            <MudSelectItem Value="5" />
+            <MudSelectItem Value="10" />
+            <MudSelectItem Value="20" />
+            <MudSelectItem Value="50" />
+        </MudSelect>
+    </MudItem>
+</MudGrid>
+
+<MudTable @ref="@usersTable"
+          Items="@allUsers"
+          RowsPerPage="10"
+          Hover="true"
+          Breakpoint="Breakpoint.Sm"
+          LoadingProgressColor="Color.Info">
+    <HeaderContent>
+        <MudTh>Registration data</MudTh>
+        <MudTh>User name</MudTh>
+        <MudTh>Email address</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nr">@context.CreatedOn</MudTd>
+            <MudTd DataLabel="Sign">@context.UserName</MudTd>
+            <MudTd DataLabel="Name">@context.Email</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudPagination SelectedChanged="PageChanged" Count="@(responseContent.Result.PagesCount)" Class="pa-4" />
+        </PagerContent>
+    </MudTable>
+    @code {
+
+    private MudTable<UserResponseModel> usersTable;
+
+    private UsersFilter usersFilter = new();
+    private ResponseContent<PaginationResponseModel<UserResponseModel>> responseContent = new();
+
+    private IList<UserResponseModel> allUsers;
+    private IList<UserResponseModel> filteredUsers;
+
+    private string searchTerm;
+    private int itemsPerPage;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        responseContent = await _userClient.GetAllAsync(usersFilter);
+
+        allUsers = responseContent.Result.Items.ToList();
+        filteredUsers = allUsers;
+    }
+
+    private void PageChanged(int i)
+    {
+        usersTable.NavigateTo(i - 1);
+    }
+}

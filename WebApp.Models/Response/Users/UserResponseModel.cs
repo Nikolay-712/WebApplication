@@ -1,0 +1,14 @@
+﻿namespace WebApp.Models.Response.Users;
+
+public class UserResponseModel
+{
+    public Guid UserId { get; set; }
+
+    public string CreatedOn { get; set; }
+
+    public string UserName { get; set; }
+
+    public string Email { get; set; }
+
+    public IList<string> Roles { get; set; }
+}

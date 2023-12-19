@@ -1,6 +1,7 @@
 ﻿using WebApp.Data.Entities;
 using WebApp.Models.Response;
 using WebApp.Models.Response.Roles;
+using WebApp.Models.Response.Users;
 
 namespace WebApp.Models.MappingExtensions;
 
@@ -25,6 +26,18 @@ public static class AutoMapperExtensions
             CreatedOn = role.CreatedOn.ToString("dd.MM.yyyy"),
             DescriptionBg = role.DescriptionBg,
             DescriptionEn = role.DescriptionEn,
+        };
+    }
+
+    public static UserResponseModel ToUserResponseModel(this ApplicationUser user,IList<string> roles)
+    {
+        return new UserResponseModel
+        {
+            UserId = user.Id,
+            CreatedOn = user.CreatedOn.ToString("dd.MM.yyyy"),
+            UserName = user.UserName!,
+            Email = user.Email!,
+            Roles = roles,
         };
     }
 }

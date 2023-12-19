@@ -35,6 +35,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddMudServices();
 
 builder.Services.AddScoped<IRoleClientService, RoleClientService>();
+builder.Services.AddScoped<IUserClientService, UserClientService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAccountClientService, AccountClientService>();
 builder.Services.AddScoped<AuthenticationStateProvider, ClientAuthenticationStateProvider>();
