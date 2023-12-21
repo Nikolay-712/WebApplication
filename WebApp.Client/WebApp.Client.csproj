@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\Shared\Dialogs\**" />
+    <Content Remove="Pages\Shared\Dialogs\**" />
+    <EmbeddedResource Remove="Pages\Shared\Dialogs\**" />
+    <None Remove="Pages\Shared\Dialogs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Blazored.FluentValidation" Version="2.1.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.0" />
@@ -20,10 +27,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WebApp.Models\WebApp.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pages\Shared\Dialogs\" />
   </ItemGroup>
 
 </Project>

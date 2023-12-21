@@ -1,9 +1,12 @@
 using FluentValidation.AspNetCore;
+using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
 using WebApp.Common.Configurations;
 using WebApp.Data;
@@ -48,7 +51,7 @@ internal class Program
              options.LocalizationEnabled = true;
          });
 
-        SwaggerConfiguration(services);
+        SwaggerConfiguration(services, configuration);
 
         ApplicationContextConfiguration(services, configuration);
         JwtTokenConfiguration(services, configuration);
@@ -73,6 +76,8 @@ internal class Program
         services.Configure<JwtTokenSettings>(configuration.GetSection(nameof(JwtTokenSettings)));
         services.Configure<EmailSenderSettings>(configuration.GetSection(nameof(EmailSenderSettings)));
         services.Configure<RequestLocalizationSettings>(configuration.GetSection(nameof(RequestLocalizationSettings)));
+        services.Configure<SwaggerSettings>(configuration.GetSection(nameof(SwaggerSettings)));
+
     }
 
     private static void ConfigureRequestLocalization(IApplicationBuilder app, IConfiguration configuration)
@@ -156,10 +161,50 @@ internal class Program
         });
     }
 
-    private static void SwaggerConfiguration(IServiceCollection services)
+    private static void SwaggerConfiguration(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        SwaggerSettings swaggerSettings = new();
+        configuration.GetSection(nameof(SwaggerSettings)).Bind(swaggerSettings);
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc(swaggerSettings.Version, new OpenApiInfo
+            {
+                Title = swaggerSettings.Title,
+                Version = swaggerSettings.Version,
+            });
+
+            //string xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            //string xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            //options.IncludeXmlComments(xmlPath);
+
+            options.AddSecurityDefinition(swaggerSettings.SecurityDefinitionType, new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = swaggerSettings.Description,
+                Name = swaggerSettings.SecurityDefinitionName,
+                Type = SecuritySchemeType.Http,
+                BearerFormat = swaggerSettings.BearerFormat,
+                Scheme = swaggerSettings.Scheme,
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type= ReferenceType.SecurityScheme,
+                            Id= swaggerSettings.SecurityDefinitionType,
+                        }
+                    },
+                    new string[]{}
+                }
+            });
+        });
+
+        services.AddFluentValidationRulesToSwagger();
     }
 
     private static void AddApplicationServices(IServiceCollection services)
