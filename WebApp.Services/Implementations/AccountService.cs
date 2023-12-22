@@ -76,7 +76,7 @@ public class AccountService : IAccountService
         }
 
         Uri confirmationUri = await GenerateEmailConfirmationUri(user);
-        await _emailSenderService.SendEmailConfirmationAsync(user.Email, confirmationUri.AbsoluteUri);
+        //await _emailSenderService.SendEmailConfirmationAsync(user.Email, confirmationUri.AbsoluteUri);
 
         _logger.LogInformation("Succeeded registration with email address: {email}", requestModel.Email);
         return identityResult.Succeeded;
@@ -224,7 +224,7 @@ public class AccountService : IAccountService
         string token = await _jwtTokenManager.GenerateConfirmEmailTokenAsync(user);
         string baseUrl = "https://localhost:7061";
 
-        Uri confirmationLink = new Uri($@"{baseUrl}account/confirm-email?identifier={user.Id}&token={token}", new UriCreationOptions());
+        Uri confirmationLink = new Uri($@"{baseUrl}/account/confirm-email?identifier={user.Id}&token={token}", new UriCreationOptions());
         return confirmationLink;
     }
 
@@ -233,7 +233,7 @@ public class AccountService : IAccountService
         string resetPasswordToken = await _jwtTokenManager.GenerateForgetPasswordTokenAsync(user);
         string baseUrl = "https://localhost:7061";
 
-        Uri changePasswordLink = new Uri($@"{baseUrl}account/change-password?identifier={user.Id}&token={resetPasswordToken}", new UriCreationOptions());
+        Uri changePasswordLink = new Uri($@"{baseUrl}/account/change-password?identifier={user.Id}&token={resetPasswordToken}", new UriCreationOptions());
         return changePasswordLink;
     }
 

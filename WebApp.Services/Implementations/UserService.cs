@@ -37,9 +37,8 @@ public class UserService : IUserService
 
     public async Task<PaginationResponseModel<UserResponseModel>> GetAllUsersAsync(UsersFilter usersFilter)
     {
-        IQueryable<ApplicationUser> usersQuery = _userManager.Users;
+        IQueryable<ApplicationUser> usersQuery = _userManager.Users.Include(x => x.Roles);
         usersQuery = await ApplyUserFilterAsync(usersQuery, usersFilter);
-
 
         int totalCount = await usersQuery.CountAsync();
         int pagesCount = (int)Math.Ceiling((double)totalCount / usersFilter.ItemsPerPage!.Value);
@@ -49,7 +48,7 @@ public class UserService : IUserService
             .Take(usersFilter.ItemsPerPage!.Value);
 
         IReadOnlyList<UserResponseModel> usersResponses = await usersQuery
-            .Select(x => x.ToUserResponseModel(_userManager.GetRolesAsync(x).Result))
+            .Select(x => x.ToUserResponseModel(new List<string>()))
             .ToListAsync();
 
         return new PaginationResponseModel<UserResponseModel>
@@ -60,8 +59,6 @@ public class UserService : IUserService
             ItemsPerPage = usersFilter.ItemsPerPage!.Value,
             PagesCount = pagesCount,
         };
-
-        throw new NotImplementedException();
     }
 
     private async Task<IQueryable<ApplicationUser>> ApplyUserFilterAsync(IQueryable<ApplicationUser> users, UsersFilter usersFilter)

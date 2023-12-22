@@ -1,44 +1,38 @@
 ﻿@page "/administration/users/all"
-@using WebApp.Models.Request.Users
-@using WebApp.Models.Response.Users
 @inject IUserClientService _userClient;
 
-<MudGrid>
-    <MudItem xs="12" sm="6">
-        <MudTextField Label="Search" Placeholder="Type to search..."
-                      Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" Value="@searchTerm" OnInput="OnSearchInput" />
-
-    </MudItem>
-    <MudItem xs="12" sm="6">
-        <MudSelect T="int" @bind-Value="itemsPerPage" Label="Items per page" oninput="Change" Dense>
+<MudTable @ref="@usersTable" Items="@allUsers" RowsPerPage="@pageSize" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">All users</MudText>
+        <MudSpacer />
+        <MudTextField @bind-Value="searchTerm" OnDebounceIntervalElapsed="OnSearchAsync" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" DebounceInterval="500" Class="mt-0" />
+        <MudSelect T="int" ValueChanged="OnChangePageSizeAsync" Label="Items per page" Value="@pageSize" Class="mt-0">
             <MudSelectItem Value="5" />
             <MudSelectItem Value="10" />
             <MudSelectItem Value="20" />
             <MudSelectItem Value="50" />
         </MudSelect>
-    </MudItem>
-</MudGrid>
+    </ToolBarContent>
 
-<MudTable @ref="@usersTable"
-          Items="@allUsers"
-          RowsPerPage="10"
-          Hover="true"
-          Breakpoint="Breakpoint.Sm"
-          LoadingProgressColor="Color.Info">
     <HeaderContent>
-        <MudTh>Registration data</MudTh>
+        <MudTh>Created on</MudTh>
+        <MudTh>Email</MudTh>
         <MudTh>User name</MudTh>
-        <MudTh>Email address</MudTh>
     </HeaderContent>
+
     <RowTemplate>
-        <MudTd DataLabel="Nr">@context.CreatedOn</MudTd>
-            <MudTd DataLabel="Sign">@context.UserName</MudTd>
-            <MudTd DataLabel="Name">@context.Email</MudTd>
+        <MudTd>@context.CreatedOn</MudTd>
+            <MudTd>@context.Email</MudTd>
+            <MudTd>@context.UserName</MudTd>
         </RowTemplate>
+
         <PagerContent>
-            <MudPagination SelectedChanged="PageChanged" Count="@(responseContent.Result.PagesCount)" Class="pa-4" />
+            <MudPagination SelectedChanged="OnChangePageAsync" Count="@pagesCount" Class="pa-4" />
         </PagerContent>
     </MudTable>
+
+
+
     @code {
 
     private MudTable<UserResponseModel> usersTable;
@@ -46,23 +40,57 @@
     private UsersFilter usersFilter = new();
     private ResponseContent<PaginationResponseModel<UserResponseModel>> responseContent = new();
 
-    private IList<UserResponseModel> allUsers;
-    private IList<UserResponseModel> filteredUsers;
+    IReadOnlyList<UserResponseModel> allUsers = new List<UserResponseModel>();
 
-    private string searchTerm;
-    private int itemsPerPage;
-
+    private int pageSize = 10;
+    private int pagesCount;
+    private string? searchTerm;
 
     protected override async Task OnInitializedAsync()
     {
         responseContent = await _userClient.GetAllAsync(usersFilter);
-
-        allUsers = responseContent.Result.Items.ToList();
-        filteredUsers = allUsers;
+        allUsers = responseContent.Result.Items;
+        pagesCount = responseContent.Result.PagesCount;
     }
 
-    private void PageChanged(int i)
+    private async Task OnSearchAsync(string searchTerm)
     {
-        usersTable.NavigateTo(i - 1);
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            usersFilter.SearchTerm = searchTerm;
+            usersFilter.ItemsPerPage = null;
+            usersFilter.PageNumber = null;
+        }
+        else
+        {
+            usersFilter.SearchTerm = searchTerm;
+            usersFilter.ItemsPerPage = pageSize;
+        }
+
+        responseContent = await _userClient.GetAllAsync(usersFilter);
+        allUsers = responseContent.Result.Items;
+        pagesCount = responseContent.Result.PagesCount;
+    }
+
+    private async Task OnChangePageAsync(int pageNumber)
+    {
+        usersFilter.PageNumber = pageNumber;
+
+        responseContent = await _userClient.GetAllAsync(usersFilter);
+        allUsers = responseContent.Result.Items;
+        pagesCount = responseContent.Result.PagesCount;
+
+        usersTable.NavigateTo(pageNumber);
+    }
+
+    private async Task OnChangePageSizeAsync(int itemsPerPage)
+    {
+        usersFilter.ItemsPerPage = itemsPerPage;
+
+        responseContent = await _userClient.GetAllAsync(usersFilter);
+        allUsers = responseContent.Result.Items;
+        pagesCount = responseContent.Result.PagesCount;
+
+        pageSize = itemsPerPage;
     }
 }
