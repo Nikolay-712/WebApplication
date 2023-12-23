@@ -9,5 +9,7 @@ public interface IUserService
 {
     Task<ApplicationUser> GetByIdAsync(Guid userId);
 
+    Task<UserResponseModel> GetDetailsByIdAsync(Guid userId);
+
     Task<PaginationResponseModel<UserResponseModel>> GetAllUsersAsync(UsersFilter usersFilter);
 }

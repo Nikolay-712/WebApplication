@@ -1,7 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using WebApp.Client.Services.Interfaces;
 using WebApp.Models;
+using WebApp.Models.Request.Roles;
 using WebApp.Models.Request.Users;
 using WebApp.Models.Response.Users;
 
@@ -32,6 +34,34 @@ public class UserClientService : IUserClientService
 
         ResponseContent<PaginationResponseModel<UserResponseModel>>? responseContent = await responseMessage
             .Content.ReadFromJsonAsync<ResponseContent<PaginationResponseModel<UserResponseModel>>>();
+
+        return responseContent!;
+    }
+
+    public async Task<ResponseContent<UserResponseModel>> GetDetailsAsync(Guid userId)
+    {
+        using HttpRequestMessage requestMessage = new();
+        requestMessage.Method = HttpMethod.Get;
+        requestMessage.RequestUri = new Uri($"{_baseUrl}details/{userId}");
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+
+        ResponseContent<UserResponseModel>? responseContent = await responseMessage
+            .Content.ReadFromJsonAsync<ResponseContent<UserResponseModel>>();
+
+        return responseContent!;
+    }
+
+    public async Task<ResponseContent> AssignUserToRoleAsync(AssignToRoleRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.RequestUri = new Uri($"{_httpClient.BaseAddress!.AbsoluteUri}api/roles/assign-user");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+        ResponseContent? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent>();
 
         return responseContent!;
     }

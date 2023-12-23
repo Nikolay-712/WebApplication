@@ -27,4 +27,14 @@ public class UsersController : ControllerBase
             Result = allUsers
         };
     }
+
+    [HttpGet("details/{userId}")]
+    public async Task<ResponseContent<UserResponseModel>> GetDetailsAsync([FromRoute] Guid userId)
+    {
+        UserResponseModel userDetails = await _userService.GetDetailsByIdAsync(userId);
+        return new ResponseContent<UserResponseModel>
+        {
+            Result = userDetails
+        };
+    }
 }

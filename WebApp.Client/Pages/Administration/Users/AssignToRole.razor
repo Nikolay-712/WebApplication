@@ -1,0 +1,121 @@
+﻿@page "/administration/users/assign-role"
+@inject IUserClientService _userClient;
+@inject IRoleClientService _roleClient;
+@inject NavigationManager _navigationManager;
+
+@attribute [Authorize(Roles = "Super admin")]
+
+<div class="row">
+    <div class="col-md-6">
+        <MudDataGrid Items="@allRoles" ReadOnly="@true">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">All Roles</MudText>
+                <MudSpacer />
+                <MudTextField T="string" OnDebounceIntervalElapsed="OnSearch" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" DebounceInterval="500" Class="mt-0" />
+            </ToolBarContent>
+            <Columns>
+                <HierarchyColumn T="RoleResponseModel" />
+                <PropertyColumn Property="x => x.Name" />
+            </Columns>
+            <ChildRowContent>
+                <MudCard>
+
+                    <MudCardHeader>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h6">@context.Item.Name</MudText>
+                            </CardHeaderContent>
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudText>Description: @context.Item.DescriptionBg</MudText>
+                            <MudText>Description: @context.Item.DescriptionEn</MudText>
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Class="ml-auto"
+                                       OnClick="@(() => AddRoleAsync(context.Item.Id))">
+                                Add role
+                            </MudButton>
+                        </MudCardContent>
+                    </MudCard>
+                </ChildRowContent>
+            </MudDataGrid>
+        </div>
+        <div class="col-md-6">
+            <DisplayErrorMessage Message="@errorMessage" />
+
+            @if (userDetailsResponse.Result is not null)
+        {
+            <p>@userDetailsResponse.Result.Email</p>
+            <p>@userDetailsResponse.Result.UserName</p>
+            <p>@userDetailsResponse.Result.CreatedOn</p>
+
+            <MudChipSet AllClosable="true" OnClose="RemoveRoleAsync">
+
+                @foreach (var roleName in userDetailsResponse.Result.Roles)
+                {
+                    <MudChip Icon="@Icons.Material.Filled.VerifiedUser" Value="@roleName" Color="Color.Info">@roleName</MudChip>
+                }
+
+            </MudChipSet>
+        }
+
+    </div>
+</div>
+
+
+
+@code {
+    [SupplyParameterFromQuery]
+    private Guid? userId { get; set; }
+
+    private IReadOnlyList<RoleResponseModel> allRoles;
+    private ResponseContent<IReadOnlyList<RoleResponseModel>> allRolesResponse = new();
+    private ResponseContent<UserResponseModel> userDetailsResponse = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (userId is null)
+        {
+            _navigationManager.NavigateTo("/", true);
+        }
+
+
+        allRolesResponse = await _roleClient.GetAllAsync();
+        userDetailsResponse = await _userClient.GetDetailsAsync(userId!.Value);
+        allRoles = allRolesResponse.Result;
+    }
+
+    private void OnSearch(string searchTerm)
+    {
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            allRoles = allRoles.Where(x => x.Name.Contains(searchTerm, StringComparison.InvariantCultureIgnoreCase)).ToList();
+        }
+        else
+        {
+            allRoles = allRolesResponse.Result;
+        }
+    }
+
+
+    private string errorMessage = string.Empty;
+    private AssignToRoleRequestModel requestModel = new();
+    private ResponseContent assignToRoleResponse = new();
+
+    private async Task AddRoleAsync(Guid roleId)
+    {
+        requestModel.UserId = userId!.Value;
+        requestModel.RoleId = roleId;
+
+        assignToRoleResponse = await _userClient.AssignUserToRoleAsync(requestModel);
+
+        if (assignToRoleResponse.ErrorResponse is not null)
+        {
+            errorMessage = assignToRoleResponse.ErrorResponse.Message;
+            return;
+        }
+
+        userDetailsResponse = await _userClient.GetDetailsAsync(userId!.Value);
+
+    }
+
+}

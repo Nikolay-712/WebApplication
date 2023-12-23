@@ -15,17 +15,12 @@
             <MudNavLink Href="/Account/Login" Match="NavLinkMatch.Prefix">Login</MudNavLink>
         </NotAuthorized>
     </AuthorizeView>
-
     <AuthorizeView Roles="@Constants.SuperAdminRoleName">
         <Authorized>
             <MudNavLink Href="/Administration/Roles/Create" Match="NavLinkMatch.Prefix">All roles</MudNavLink>
+            <MudNavLink Href="/Administration/Users/All" Match="NavLinkMatch.Prefix">All users</MudNavLink>
         </Authorized>
     </AuthorizeView>
-
-   @*  <MudNavGroup Title="Settings" Expanded="true">
-        <MudNavLink Href="/users" Match="NavLinkMatch.Prefix">Users</MudNavLink>
-        <MudNavLink Href="/security" Match="NavLinkMatch.Prefix">Security</MudNavLink>
-    </MudNavGroup> *@
 </MudNavMenu>
 
 @code {

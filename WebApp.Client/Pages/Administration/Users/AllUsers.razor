@@ -1,5 +1,6 @@
 ﻿@page "/administration/users/all"
 @inject IUserClientService _userClient;
+@inject NavigationManager _navigationManager;
 
 <MudTable @ref="@usersTable" Items="@allUsers" RowsPerPage="@pageSize" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
     <ToolBarContent>
@@ -24,6 +25,7 @@
         <MudTd>@context.CreatedOn</MudTd>
             <MudTd>@context.Email</MudTd>
             <MudTd>@context.UserName</MudTd>
+            <MudFab Color="Color.Primary" @onclick="@(() => AssignToRole(context.UserId))" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" />
         </RowTemplate>
 
         <PagerContent>
@@ -92,5 +94,10 @@
         pagesCount = responseContent.Result.PagesCount;
 
         pageSize = itemsPerPage;
+    }
+
+    private void AssignToRole(Guid userId)
+    {
+        _navigationManager.NavigateTo($"/administration/users/assign-role?userId={userId}");
     }
 }

@@ -35,6 +35,19 @@ public class UserService : IUserService
         return user;
     }
 
+    public async Task<UserResponseModel> GetDetailsByIdAsync(Guid userId)
+    {
+        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+        {
+            _logger.LogError("Not found user with ID: {userId}", userId);
+            throw new NotFoundUserException(Messages.UserNotFound);
+        }
+
+        IList<string> userRoles = await _userManager.GetRolesAsync(user);
+        return user.ToUserResponseModel(userRoles);
+    }
+
     public async Task<PaginationResponseModel<UserResponseModel>> GetAllUsersAsync(UsersFilter usersFilter)
     {
         IQueryable<ApplicationUser> usersQuery = _userManager.Users.Include(x => x.Roles);
