@@ -66,6 +66,20 @@ public class UserClientService : IUserClientService
         return responseContent!;
     }
 
+    public async Task<ResponseContent> RemoveUserFromRoleAsync(RemoveFromRoleRequestModel requestModel)
+    {
+        using HttpRequestMessage requestMessage = new();
+
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.RequestUri = new Uri($"{_httpClient.BaseAddress!.AbsoluteUri}api/roles/remove-user");
+        requestMessage.Content = HttpClientHelper.GenerateRequestContent(requestModel);
+
+        using HttpResponseMessage responseMessage = await _httpClient.SendAsync(requestMessage);
+        ResponseContent? responseContent = await responseMessage.Content.ReadFromJsonAsync<ResponseContent>();
+
+        return responseContent!;
+    }
+
     private string AddQueryParameters(UsersFilter usersFilter, string requestUrl)
     {
         StringBuilder queryParameters = new();

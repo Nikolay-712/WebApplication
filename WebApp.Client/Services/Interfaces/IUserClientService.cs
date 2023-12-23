@@ -12,4 +12,6 @@ public interface IUserClientService
     Task<ResponseContent<UserResponseModel>> GetDetailsAsync(Guid userId);
 
     Task<ResponseContent> AssignUserToRoleAsync(AssignToRoleRequestModel requestModel);
+
+    Task<ResponseContent> RemoveUserFromRoleAsync(RemoveFromRoleRequestModel requestModel);
 }

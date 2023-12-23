@@ -50,9 +50,9 @@
 
             <MudChipSet AllClosable="true" OnClose="RemoveRoleAsync">
 
-                @foreach (var roleName in userDetailsResponse.Result.Roles)
+                @foreach (var userRole in userDetailsResponse.Result.Roles)
                 {
-                    <MudChip Icon="@Icons.Material.Filled.VerifiedUser" Value="@roleName" Color="Color.Info">@roleName</MudChip>
+                    <MudChip Icon="@Icons.Material.Filled.VerifiedUser" Value="@userRole.Id" Color="Color.Info">@userRole.Name</MudChip>
                 }
 
             </MudChipSet>
@@ -66,6 +66,7 @@
 @code {
     [SupplyParameterFromQuery]
     private Guid? userId { get; set; }
+    private string errorMessage = string.Empty;
 
     private IReadOnlyList<RoleResponseModel> allRoles;
     private ResponseContent<IReadOnlyList<RoleResponseModel>> allRolesResponse = new();
@@ -96,17 +97,15 @@
         }
     }
 
-
-    private string errorMessage = string.Empty;
-    private AssignToRoleRequestModel requestModel = new();
+    private AssignToRoleRequestModel assignToRequestModel = new();
     private ResponseContent assignToRoleResponse = new();
 
     private async Task AddRoleAsync(Guid roleId)
     {
-        requestModel.UserId = userId!.Value;
-        requestModel.RoleId = roleId;
+        assignToRequestModel.UserId = userId!.Value;
+        assignToRequestModel.RoleId = roleId;
 
-        assignToRoleResponse = await _userClient.AssignUserToRoleAsync(requestModel);
+        assignToRoleResponse = await _userClient.AssignUserToRoleAsync(assignToRequestModel);
 
         if (assignToRoleResponse.ErrorResponse is not null)
         {
@@ -115,7 +114,26 @@
         }
 
         userDetailsResponse = await _userClient.GetDetailsAsync(userId!.Value);
+    }
 
+    private RemoveFromRoleRequestModel removeFromRoleRequestModel = new();
+    private ResponseContent removeFromRoleResponseModel = new();
+
+    public async Task RemoveRoleAsync(MudChip selectedRole)
+    {
+        string? roleId = selectedRole.Value.ToString();
+
+        removeFromRoleRequestModel.UserId = userId!.Value;
+        removeFromRoleRequestModel.RoleId = new Guid(roleId!);
+
+        removeFromRoleResponseModel = await _userClient.RemoveUserFromRoleAsync(removeFromRoleRequestModel);
+        if (removeFromRoleResponseModel.ErrorResponse is not null)
+        {
+            errorMessage = removeFromRoleResponseModel.ErrorResponse.Message;
+            return;
+        }
+
+        userDetailsResponse = await _userClient.GetDetailsAsync(userId!.Value);
     }
 
 }

@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using WebApp.Common.Exceptions.ClientSide;
 using WebApp.Common.Resources;
+using WebApp.Data;
 using WebApp.Data.Entities;
 using WebApp.Models;
 using WebApp.Models.MappingExtensions;
 using WebApp.Models.Request.Users;
+using WebApp.Models.Response.Roles;
 using WebApp.Models.Response.Users;
 using WebApp.Services.Interfaces;
 
@@ -15,11 +17,13 @@ namespace WebApp.Services.Implementations;
 public class UserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationContext _context;
     private readonly ILogger<UserService> _logger;
 
-    public UserService(UserManager<ApplicationUser> userManager, ILogger<UserService> logger)
+    public UserService(UserManager<ApplicationUser> userManager, ApplicationContext context, ILogger<UserService> logger)
     {
         _userManager = userManager;
+        _context = context;
         _logger = logger;
     }
 
@@ -37,15 +41,17 @@ public class UserService : IUserService
 
     public async Task<UserResponseModel> GetDetailsByIdAsync(Guid userId)
     {
-        ApplicationUser? user = await _userManager.FindByIdAsync(userId.ToString());
+        ApplicationUser? user = await _context.Users.Include(x => x.Roles).FirstOrDefaultAsync(x => x.Id == userId);
         if (user is null)
         {
             _logger.LogError("Not found user with ID: {userId}", userId);
             throw new NotFoundUserException(Messages.UserNotFound);
         }
 
-        IList<string> userRoles = await _userManager.GetRolesAsync(user);
-        return user.ToUserResponseModel(userRoles);
+        IList<ApplicationRole> userRoles = await GetUserRolesAsync(user);
+        IReadOnlyList<RoleResponseModel> userRolesResponse = userRoles.Select(x => x.ToRoleResponseModel()).ToList();
+
+        return user.ToUserResponseModel(userRolesResponse);
     }
 
     public async Task<PaginationResponseModel<UserResponseModel>> GetAllUsersAsync(UsersFilter usersFilter)
@@ -61,7 +67,7 @@ public class UserService : IUserService
             .Take(usersFilter.ItemsPerPage!.Value);
 
         IReadOnlyList<UserResponseModel> usersResponses = await usersQuery
-            .Select(x => x.ToUserResponseModel(new List<string>()))
+            .Select(x => x.ToUserResponseModel(new List<RoleResponseModel>()))
             .ToListAsync();
 
         return new PaginationResponseModel<UserResponseModel>
@@ -72,6 +78,18 @@ public class UserService : IUserService
             ItemsPerPage = usersFilter.ItemsPerPage!.Value,
             PagesCount = pagesCount,
         };
+    }
+
+    private async Task<IList<ApplicationRole>> GetUserRolesAsync(ApplicationUser user)
+    {
+        IList<ApplicationRole> userRoles = new List<ApplicationRole>();
+        foreach (var userRole in user.Roles)
+        {
+            var role = await _context.Roles.FirstOrDefaultAsync(x => x.Id == userRole.RoleId);
+            userRoles.Add(role!);
+        }
+
+        return userRoles;
     }
 
     private async Task<IQueryable<ApplicationUser>> ApplyUserFilterAsync(IQueryable<ApplicationUser> users, UsersFilter usersFilter)

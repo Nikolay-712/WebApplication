@@ -1,4 +1,6 @@
-﻿namespace WebApp.Models.Response.Users;
+﻿using WebApp.Models.Response.Roles;
+
+namespace WebApp.Models.Response.Users;
 
 public class UserResponseModel
 {
@@ -10,5 +12,5 @@ public class UserResponseModel
 
     public string Email { get; set; }
 
-    public IList<string> Roles { get; set; }
+    public IReadOnlyList<RoleResponseModel> Roles { get; set; }
 }

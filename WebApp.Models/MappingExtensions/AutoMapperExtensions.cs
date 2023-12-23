@@ -29,7 +29,7 @@ public static class AutoMapperExtensions
         };
     }
 
-    public static UserResponseModel ToUserResponseModel(this ApplicationUser user,IList<string> roles)
+    public static UserResponseModel ToUserResponseModel(this ApplicationUser user, IReadOnlyList<RoleResponseModel> roles)
     {
         return new UserResponseModel
         {
