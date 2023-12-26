@@ -6,37 +6,50 @@
 
 <div class="row">
     <div class="col-md-6">
-        @if (ShowRegistrationForm)
+        @if (showRegistrationForm)
         {
-            <EditForm Model="RequestModel" method="post" OnValidSubmit="RegistrationAsync">
-                <FluentValidationValidator />
-                <h2>Create a new account.</h2>
-                <hr />
+            <h2>Create a new account.</h2>
+            <DisplayErrorMessage Message="@errorMessage" MessageChanged="@((msg) => errorMessage = msg)" />
+            <MudCard>
+                <MudForm Model="@requestModel" Validation="(requestValidator.ValidateRequestAsync)" @ref="registrationForm">
+                    <MudCardContent>
+                        <MudTextField @bind-Value="requestModel.UserName"
+                                      For="() => requestModel.UserName"
+                                      Label="User name"
+                                      Variant="Variant.Outlined" />
 
-                <DisplayErrorMessage Message="@ErrorMessage" MessageChanged="@((msg) => ErrorMessage = msg)" />
+                        <MudTextField @bind-Value="requestModel.Email"
+                                      For="(() => requestModel.Email)"
+                                      Label="Email"
+                                      Variant="Variant.Outlined" />
 
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RequestModel.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="user name" />
-                    <label for="user-name">User name</label>
-                    <ValidationMessage For="() => RequestModel.UserName" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="RequestModel.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="email">Email</label>
-                    <ValidationMessage For="() => RequestModel.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="RequestModel.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                    <label for="password">Password</label>
-                    <ValidationMessage For="() => RequestModel.Password" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="RequestModel.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                    <label for="confirm-password">Confirm password</label>
-                    <ValidationMessage For="() => RequestModel.ConfirmPassword" class="text-danger" />
-                </div>
-                <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-            </EditForm>
+                        <MudTextField @bind-Value="requestModel.Password"
+                                      For="(() => requestModel.Password)"
+                                      Label="Password"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.End"
+                                      AdornmentColor="Color.Primary"
+                                      InputType="@PasswordInput"
+                                      AdornmentIcon="@PasswordInputIcon"
+                                      OnAdornmentClick="ShowPassword"
+                                      AdornmentAriaLabel="Show Password" />
+
+                        <MudTextField @bind-Value="requestModel.ConfirmPassword"
+                                      For="(() => requestModel.ConfirmPassword)"
+                                      Label="Confirm password"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.End"
+                                      AdornmentColor="Color.Primary"
+                                      InputType="@PasswordInput"
+                                      AdornmentIcon="@PasswordInputIcon"
+                                      OnAdornmentClick="ShowPassword"
+                                      AdornmentAriaLabel="Show Password" />
+                    </MudCardContent>
+                </MudForm>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await RegistrationAsync())">Order</MudButton>
+                </MudCardActions>
+            </MudCard>
         }
         else
         {
@@ -47,21 +60,51 @@
 </div>
 
 @code {
-    private RegistrationRequestModel RequestModel = new();
-    private ResponseContent<bool> RegistrationResponse = new();
-    private string ErrorMessage = string.Empty;
-    private bool ShowRegistrationForm = true;
+    private MudForm? registrationForm;
+    private RegistrationRequestModel requestModel = new();
+    private RegistrationRequestValidator requestValidator = new();
+    private ResponseContent<bool> registrationResponse = new();
+
+    private string errorMessage = string.Empty;
+    private bool showRegistrationForm = true;
 
     private async Task RegistrationAsync()
     {
-        RegistrationResponse = await _accountClient.RegistrationAsync(RequestModel);
+        await registrationForm!.Validate();
 
-        if (RegistrationResponse.ErrorResponse is not null)
+        if (registrationForm.IsValid)
         {
-            ErrorMessage = RegistrationResponse.ErrorResponse.Message;
-            return;
+
+            registrationResponse = await _accountClient.RegistrationAsync(requestModel);
+
+            if (registrationResponse.ErrorResponse is not null)
+            {
+                errorMessage = registrationResponse.ErrorResponse.Message;
+                return;
+            }
+
+            showRegistrationForm = false;
         }
 
-        ShowRegistrationForm = false;
+    }
+
+    bool isShow;
+    InputType PasswordInput = InputType.Password;
+    string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    private void ShowPassword()
+    {
+        @if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
     }
 }

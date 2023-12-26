@@ -4,7 +4,7 @@ using WebApp.Models.Request.Accounts;
 
 namespace WebApp.Models.Validators;
 
-public class RegistrationRequestValidator : AbstractValidator<RegistrationRequestModel>
+public class RegistrationRequestValidator : ApplicationValidator<RegistrationRequestModel>
 {
     public RegistrationRequestValidator()
     {
@@ -50,4 +50,6 @@ public class RegistrationRequestValidator : AbstractValidator<RegistrationReques
             .When(x => x.Password is not null && x.ConfirmPassword is not null)
             .WithMessage(Messages.PasswordMismatch);
     }
+
+    
 }
