@@ -5,7 +5,7 @@
         <MudForm Model="@UpdateRequest" @ref="@form"
                  Validation="@(validator.ValidateValue)"
                  ValidationDelay="0">
-            <DisplayErrorMessage Message="@ErrorMessage" />
+            <DisplayErrorMessage Message="@ErrorMessage" MessageChanged="@((msg) => ErrorMessage = msg)" />
             <MudSpacer />
             <MudCardContent>
                 <MudTextField @bind-Value="UpdateRequest.Name"

@@ -12,7 +12,7 @@
                 <h2>Use a local account to log in.</h2>
                 <hr />
 
-                <DisplayErrorMessage Message="@ErrorMessage" />
+                <DisplayErrorMessage Message="@ErrorMessage" MessageChanged="@((msg) => ErrorMessage = msg)" />
 
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="RequestModel.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />

@@ -13,7 +13,7 @@
                 <h2>Create a new account.</h2>
                 <hr />
 
-                <DisplayErrorMessage Message="@ErrorMessage" />
+                <DisplayErrorMessage Message="@ErrorMessage" MessageChanged="@((msg) => ErrorMessage = msg)" />
 
                 <div class="form-floating mb-3">
                     <InputText @bind-Value="RequestModel.UserName" class="form-control" autocomplete="username" aria-required="true" placeholder="user name" />

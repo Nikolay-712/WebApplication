@@ -12,5 +12,7 @@ public class UserResponseModel
 
     public string Email { get; set; }
 
+    public bool IsConfirmedEmail { get; set; }
+
     public IReadOnlyList<RoleResponseModel> Roles { get; set; }
 }

@@ -6,7 +6,7 @@
 @attribute [Authorize(Roles = "Super admin")]
 
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-5">
         <MudDataGrid Items="@allRoles" ReadOnly="@true">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">All Roles</MudText>
@@ -39,23 +39,35 @@
                 </ChildRowContent>
             </MudDataGrid>
         </div>
-        <div class="col-md-6">
-            <DisplayErrorMessage Message="@errorMessage" />
+        <div class="col-md-7">
+            <DisplayErrorMessage Message="@errorMessage" MessageChanged="@((msg) => errorMessage = msg)" />
 
             @if (userDetailsResponse.Result is not null)
         {
-            <p>@userDetailsResponse.Result.Email</p>
-            <p>@userDetailsResponse.Result.UserName</p>
-            <p>@userDetailsResponse.Result.CreatedOn</p>
+            <MudCard>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudText Typo="Typo.h6">User Details</MudText>
+                            <MudText><b>Email:</b> @userDetailsResponse.Result.Email</MudText>
+                                <MudText><b>Username:</b> @userDetailsResponse.Result.UserName</MudText>
+                                <MudText><b>Created On:</b> @userDetailsResponse.Result.CreatedOn</MudText>
+                                <MudText><b>Email Confirmed:</b> @(userDetailsResponse.Result.IsConfirmedEmail ? "Yes" : "No")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.h6">Roles</MudText>
+                                <MudChipSet AllClosable="true" OnClose="RemoveRoleAsync">
 
-            <MudChipSet AllClosable="true" OnClose="RemoveRoleAsync">
+                                    @foreach (var userRole in userDetailsResponse.Result.Roles)
+                                {
+                                    <MudChip Icon="@Icons.Material.Filled.VerifiedUser" Value="@userRole.Id" Color="Color.Info">@userRole.Name</MudChip>
+                                }
 
-                @foreach (var userRole in userDetailsResponse.Result.Roles)
-                {
-                    <MudChip Icon="@Icons.Material.Filled.VerifiedUser" Value="@userRole.Id" Color="Color.Info">@userRole.Name</MudChip>
-                }
-
-            </MudChipSet>
+                            </MudChipSet>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
         }
 
     </div>
@@ -64,6 +76,7 @@
 
 
 @code {
+
     [SupplyParameterFromQuery]
     private Guid? userId { get; set; }
     private string errorMessage = string.Empty;
@@ -130,10 +143,10 @@
         if (removeFromRoleResponseModel.ErrorResponse is not null)
         {
             errorMessage = removeFromRoleResponseModel.ErrorResponse.Message;
+            Console.WriteLine(errorMessage);
             return;
         }
 
         userDetailsResponse = await _userClient.GetDetailsAsync(userId!.Value);
     }
-
 }

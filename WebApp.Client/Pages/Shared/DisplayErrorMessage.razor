@@ -1,12 +1,22 @@
-﻿
-@if (!string.IsNullOrEmpty(Message))
+﻿@if (!string.IsNullOrEmpty(Message))
 {
-    <div class="alert alert-danger" role="alert">
+    <MudAlert Severity="Severity.Error"
+              ContentAlignment="HorizontalAlignment.Center"
+              ShowCloseIcon="true"
+              CloseIconClicked="CloseMe">
         @Message
-    </div>
+    </MudAlert>
 }
 
 @code {
     [Parameter]
     public string Message { get; set; }
+
+    [Parameter]
+    public EventCallback<string> MessageChanged { get; set; }
+
+    private async Task CloseMe()
+    {
+        await MessageChanged.InvokeAsync(string.Empty);
+    }
 }

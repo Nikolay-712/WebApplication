@@ -2,7 +2,7 @@
 @inject IAccountClientService _accountClient
 @inject NavigationManager _navigationManager
 
-<DisplayErrorMessage Message="@ErrorMessage" />
+<DisplayErrorMessage Message="@ErrorMessage" MessageChanged="@((msg) => ErrorMessage = msg)" />
 
 @code {
     private ResponseContent ResponseContent = new();

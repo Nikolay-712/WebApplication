@@ -37,6 +37,7 @@ public static class AutoMapperExtensions
             CreatedOn = user.CreatedOn.ToString("dd.MM.yyyy"),
             UserName = user.UserName!,
             Email = user.Email!,
+            IsConfirmedEmail = user.EmailConfirmed,
             Roles = roles,
         };
     }
